@@ -42,6 +42,7 @@ const charactersData = [
         id: 'heyi',
         name: '河一',
         emoji: '🧔',
+        avatar: 'assets/images/河一.png',
         camp: 'protagonist',
         campName: '主角团',
         identity: '界域风水师',
@@ -284,7 +285,10 @@ function renderCharacters() {
         <div class="character-card" 
              onclick="showCharacterDetail('${char.id}')">
             <div class="h-32 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
-                <span class="text-4xl">${char.emoji}</span>
+                ${char.avatar 
+                    ? `<img src="${char.avatar}" alt="${char.name}" class="w-16 h-16 rounded-full object-cover">`
+                    : `<span class="text-4xl">${char.emoji}</span>`
+                }
             </div>
             <div class="p-3">
                 <h3 class="font-bold text-lg" style="color: #ccd6f6;">${char.name}</h3>
@@ -317,7 +321,12 @@ function showCharacterDetail(charId) {
     const title = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
     
-    title.textContent = `${char.emoji} ${char.name}`;
+    // 设置标题（支持头像图片）
+    if (char.avatar) {
+        title.innerHTML = `<img src="${char.avatar}" alt="${char.name}" class="w-8 h-8 rounded-full inline-block mr-2"> ${char.name}`;
+    } else {
+        title.textContent = `${char.emoji} ${char.name}`;
+    }
     content.innerHTML = `
         <div class="space-y-6" style="color: #ccd6f6;">
             <!-- 基本信息 -->
