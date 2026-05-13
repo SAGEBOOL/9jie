@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
-            margin: 0;
-            padding: 0;
+            margin:0;
+            padding:0;
             box-sizing: border-box;
         }
 
@@ -310,22 +310,6 @@
             text-decoration: underline;
         }
 
-        .back-link {
-            text-align: center;
-            margin-top: 16px;
-        }
-
-        .back-link a {
-            color: #8892b0;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-
-        .back-link a:hover {
-            color: #ccd6f6;
-        }
-
         /* 用户信息面板 */
         .user-panel {
             display: none;
@@ -447,10 +431,10 @@
                 <h1>九界修真百科</h1>
                 <p>探索修真世界的无限奥秘</p>
             </div>
-
+            
             <!-- 消息提示 -->
             <div id="message" class="message"></div>
-
+            
             <!-- 用户面板（已登录） -->
             <div id="userPanel" class="user-panel">
                 <div class="user-avatar">👤</div>
@@ -473,14 +457,14 @@
                 <button class="btn btn-wiki" onclick="goToWiki()">进入百科</button>
                 <button class="btn btn-logout" onclick="logout()">退出登录</button>
             </div>
-
+            
             <!-- 登录/注册表单 -->
             <div id="authForm">
                 <div class="tabs">
                     <div class="tab active" onclick="switchTab('login')">登录</div>
                     <div class="tab" onclick="switchTab('register')">注册</div>
                 </div>
-
+                
                 <!-- 登录表单 -->
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
@@ -499,7 +483,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">登录</button>
                 </form>
-
+                
                 <!-- 注册表单 -->
                 <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
                     <div class="form-group">
@@ -535,52 +519,39 @@
                     <button type="submit" class="btn btn-primary">注册</button>
                 </form>
             </div>
-
+            
             <!-- 管理员入口 -->
             <div class="admin-link">
                 <a href="admin.html">管理员登录</a>
             </div>
         </div>
     </div>
-
+    
+    <script src="assets/js/auth.js"></script>
     <script>
-        // 动态 API 地址：本地开发用 localhost，生产环境用相对路径
-        const API_BASE = window.location.origin.includes('localhost')
-            ? 'http://localhost:3000/api'
-            : '/api';
         let currentTab = 'login';
 
         // 检查是否已登录
         function checkAuth() {
-            const userId = localStorage.getItem('userId');
-            const username = localStorage.getItem('username');
-
-            if (userId && username) {
-                showUserPanel(username);
-                fetchUserInfo(userId);
+            const user = getCurrentUser();
+            if (user) {
+                showUserPanel(user);
             }
         }
 
-        // 获取用户信息
-        async function fetchUserInfo(userId) {
-            try {
-                const res = await fetch(`${API_BASE}/user`, {
-                    headers: { 'x-user-id': userId }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    updateUserInfo(data.user);
-                }
-            } catch (e) {
-                console.error('获取用户信息失败', e);
-            }
+        // 显示用户面板
+        function showUserPanel(user) {
+            document.getElementById('authForm').style.display = 'none';
+            document.getElementById('userPanel').classList.add('show');
+            document.querySelector('.admin-link').style.display = 'none';
+            updateUserInfo(user);
         }
 
         // 更新用户信息显示
         function updateUserInfo(user) {
             document.getElementById('userName').textContent = user.username;
             document.getElementById('userCreated').textContent = new Date(user.created_at).toLocaleString('zh-CN');
-
+            
             const statusEl = document.getElementById('userStatus');
             if (user.status === 'authorized') {
                 statusEl.textContent = '已授权 ✓';
@@ -593,13 +564,6 @@
 
             document.getElementById('userEmail').textContent = user.email || '-';
             document.getElementById('userPhone').textContent = user.phone || '-';
-        }
-
-        // 显示用户面板
-        function showUserPanel(username) {
-            document.getElementById('authForm').style.display = 'none';
-            document.getElementById('userPanel').classList.add('show');
-            document.querySelector('.admin-link').style.display = 'none';
         }
 
         // 切换标签
@@ -626,40 +590,28 @@
         }
 
         // 处理登录
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             hideMessage();
 
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            try {
-                const res = await fetch(`${API_BASE}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    localStorage.setItem('userId', data.user.id);
-                    localStorage.setItem('username', data.user.username);
-                    showUserPanel(data.user.username);
-                    updateUserInfo(data.user);
+            const result = loginUser(username, password);
+            
+            if (result.success) {
+                showUserPanel(result.user);
+            } else {
+                if (result.status === 'pending') {
+                    showMessage(result.message, 'pending');
                 } else {
-                    if (data.status === 'pending') {
-                        showMessage(data.message, 'pending');
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
+                    showMessage(result.message, 'error');
                 }
-            } catch (e) {
-                showMessage('连接服务器失败，请确保服务器已启动', 'error');
             }
         }
 
         // 处理注册
-        async function handleRegister(e) {
+        function handleRegister(e) {
             e.preventDefault();
             hideMessage();
 
@@ -678,30 +630,20 @@
                 return;
             }
 
-            try {
-                const res = await fetch(`${API_BASE}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, email, phone })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    showMessage('注册成功！请等待管理员授权后登录', 'success');
-                    // 切换到登录页面
-                    setTimeout(() => switchTab('login'), 2000);
-                } else {
-                    showMessage(data.message, 'error');
-                }
-            } catch (e) {
-                showMessage('连接服务器失败，请确保服务器已启动', 'error');
+            const result = registerUser(username, password, email, phone);
+            
+            if (result.success) {
+                showMessage('注册成功！已自动授权', 'success');
+                // 切换到登录页面
+                setTimeout(() => switchTab('login'), 2000);
+            } else {
+                showMessage(result.message, 'error');
             }
         }
 
         // 退出登录
         function logout() {
-            localStorage.removeItem('userId');
-            localStorage.removeItem('username');
+            logoutUser();
             location.reload();
         }
 
@@ -713,7 +655,7 @@
         // 初始化雨滴效果
         function initRain() {
             const rainOverlay = document.getElementById('rainOverlay');
-            const dropCount = 80; // 雨滴数量
+            const dropCount = 80;
 
             for (let i = 0; i < dropCount; i++) {
                 createRainDrop(rainOverlay);
@@ -724,15 +666,10 @@
             const drop = document.createElement('div');
             drop.className = 'rain-drop';
             
-            // 随机位置
             const left = Math.random() * 100;
-            // 随机高度 (雨滴长度)
             const height = 15 + Math.random() * 40;
-            // 随机动画时长
             const duration = 2 + Math.random() * 4;
-            // 随机延迟
             const delay = Math.random() * 8;
-            // 随机透明度
             const opacity = 0.3 + Math.random() * 0.5;
             
             drop.style.left = `${left}%`;
@@ -741,10 +678,9 @@
             drop.style.animationDelay = `${delay}s`;
             drop.style.opacity = opacity;
             
-            // 随机绿色色调
-            const greenHue = 120 + Math.random() * 40; // 120-160 (绿色范围)
-            const saturation = 70 + Math.random() * 30; // 70-100%
-            const lightness = 40 + Math.random() * 30; // 40-70%
+            const greenHue = 120 + Math.random() * 40;
+            const saturation = 70 + Math.random() * 30;
+            const lightness = 40 + Math.random() * 30;
             drop.style.background = `linear-gradient(
                 to bottom,
                 hsla(${greenHue}, ${saturation}%, ${lightness}%, 0) 0%,
@@ -756,7 +692,6 @@
             
             container.appendChild(drop);
             
-            // 动画结束后重新创建
             drop.addEventListener('animationiteration', () => {
                 drop.style.left = `${Math.random() * 100}%`;
                 drop.style.animationDuration = `${2 + Math.random() * 4}s`;

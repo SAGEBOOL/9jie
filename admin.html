@@ -552,17 +552,14 @@
         </div>
     </div>
 
+    <script src="assets/js/auth.js"></script>
     <script>
-        // 动态 API 地址：本地开发用 localhost，生产环境用相对路径
-        const API_BASE = window.location.origin.includes('localhost')
-            ? 'http://localhost:3000/api'
-            : '/api';
         let allUsers = [];
         let currentFilter = 'all';
 
         // 检查是否已登录
         function checkAdminAuth() {
-            const isAdminLoggedIn = localStorage.getItem('adminLoggedIn');
+            const isAdminLoggedIn = localStorage.getItem('9jie_admin_logged_in');
             if (isAdminLoggedIn === 'true') {
                 showAdminPanel();
                 loadUsers();
@@ -583,54 +580,38 @@
         }
 
         // 管理员登录
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             showLoginMessage('');
 
             const username = document.getElementById('adminUsername').value;
             const password = document.getElementById('adminPassword').value;
 
-            try {
-                const res = await fetch(`${API_BASE}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
+            const result = loginAdmin(username, password);
 
-                if (data.success) {
-                    localStorage.setItem('adminLoggedIn', 'true');
-                    localStorage.setItem('adminUsername', username);
-                    showAdminPanel();
-                    loadUsers();
-                } else {
-                    showLoginMessage(data.message);
-                }
-            } catch (e) {
-                showLoginMessage('连接服务器失败，请确保服务器已启动');
+            if (result.success) {
+                showAdminPanel();
+                loadUsers();
+            } else {
+                showLoginMessage(result.message);
             }
         }
 
         // 退出登录
         function logout() {
-            localStorage.removeItem('adminLoggedIn');
-            localStorage.removeItem('adminUsername');
+            localStorage.removeItem('9jie_admin_logged_in');
+            localStorage.removeItem('9jie_admin_username');
             location.reload();
         }
 
         // 加载用户列表
-        async function loadUsers() {
-            try {
-                const res = await fetch(`${API_BASE}/admin/users`);
-                const data = await res.json();
-
-                if (data.success) {
-                    allUsers = data.users;
-                    updateStats(data.users);
-                    renderUsers(allUsers);
-                }
-            } catch (e) {
-                console.error('加载用户失败', e);
+        function loadUsers() {
+            const data = getAdminUserList();
+            
+            if (data.success) {
+                allUsers = data.users;
+                updateStats(allUsers);
+                renderUsers(allUsers);
             }
         }
 
@@ -647,7 +628,13 @@
         function filterUsers(status) {
             currentFilter = status;
             document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.textContent.includes(status === 'all' ? '全部' : status === 'pending' ? '待审核' : status === 'authorized' ? '已授权' : '已拒绝'));
+                const text = tab.textContent;
+                tab.classList.toggle('active', 
+                    (status === 'all' && text.includes('全部')) ||
+                    (status === 'pending' && text.includes('待审核')) ||
+                    (status === 'authorized' && text.includes('已授权')) ||
+                    (status === 'rejected' && text.includes('已拒绝'))
+                );
             });
 
             const filtered = status === 'all' ? allUsers : allUsers.filter(u => u.status === status);
@@ -688,69 +675,36 @@
         }
 
         // 授权用户
-        async function authorizeUser(userId) {
-            const adminUsername = localStorage.getItem('adminUsername');
-            try {
-                const res = await fetch(`${API_BASE}/admin/authorize`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, action: 'authorize', adminUsername })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    loadUsers();
-                } else {
-                    alert(data.message);
-                }
-            } catch (e) {
-                alert('操作失败');
+        function authorizeUser(userId) {
+            const result = authorizeUser(userId, 'authorize');
+            if (result.success) {
+                loadUsers();
+            } else {
+                alert(result.message);
             }
         }
 
         // 拒绝用户
-        async function rejectUser(userId) {
+        function rejectUser(userId) {
             if (!confirm('确定要拒绝该用户的注册申请吗？')) return;
 
-            const adminUsername = localStorage.getItem('adminUsername');
-            try {
-                const res = await fetch(`${API_BASE}/admin/authorize`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, action: 'reject', adminUsername })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    loadUsers();
-                } else {
-                    alert(data.message);
-                }
-            } catch (e) {
-                alert('操作失败');
+            const result = authorizeUser(userId, 'reject');
+            if (result.success) {
+                loadUsers();
+            } else {
+                alert(result.message);
             }
         }
 
         // 重置用户状态
-        async function resetUser(userId) {
+        function resetUser(userId) {
             if (!confirm('确定要重置该用户的审核状态吗？')) return;
 
-            const adminUsername = localStorage.getItem('adminUsername');
-            try {
-                const res = await fetch(`${API_BASE}/admin/authorize`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, action: 'reset', adminUsername })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    loadUsers();
-                } else {
-                    alert(data.message);
-                }
-            } catch (e) {
-                alert('操作失败');
+            const result = authorizeUser(userId, 'reset');
+            if (result.success) {
+                loadUsers();
+            } else {
+                alert(result.message);
             }
         }
 
