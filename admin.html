@@ -664,46 +664,52 @@
                     </td>
                     <td>${new Date(user.created_at).toLocaleString('zh-CN')}</td>
                     <td class="action-btns">
-                        ${user.status !== 'authorized' ? `<button class="action-btn authorize" onclick="authorizeUser(${user.id})">授权</button>` : ''}
-                        ${user.status !== 'rejected' ? `<button class="action-btn reject" onclick="rejectUser(${user.id})">拒绝</button>` : ''}
-                        ${user.status !== 'pending' ? `<button class="action-btn reset" onclick="resetUser(${user.id})">重置</button>` : ''}
+                        ${user.status !== 'authorized' ? `<button class="action-btn authorize" onclick="authorizeUser(${user.id}, 'authorize')">授权</button>` : ''}
+                        ${user.status !== 'rejected' ? `<button class="action-btn reject" onclick="authorizeUser(${user.id}, 'reject')">拒绝</button>` : ''}
+                        ${user.status !== 'pending' ? `<button class="action-btn reset" onclick="authorizeUser(${user.id}, 'reset')">重置</button>` : ''}
                     </td>
                 </tr>
             `).join('');
         }
 
-        // 授权用户
-        function authorizeUser(userId) {
-            const result = authorizeUser(userId, 'authorize');
-            if (result.success) {
-                loadUsers();
-            } else {
-                alert(result.message);
+        // 授权/拒绝/重置用户
+        function authorizeUser(userId, action) {
+            if (!confirm('确定要执行此操作吗？')) return;
+            
+            const users = getUsers();
+            const userIndex = users.findIndex(u => u.id === userId);
+            
+            if (userIndex === -1) {
+                alert('用户不存在');
+                return;
             }
-        }
-
-        // 拒绝用户
-        function rejectUser(userId) {
-            if (!confirm('确定要拒绝该用户的注册申请吗？')) return;
-
-            const result = authorizeUser(userId, 'reject');
-            if (result.success) {
-                loadUsers();
-            } else {
-                alert(result.message);
+            
+            const user = users[userIndex];
+            
+            switch(action) {
+                case 'authorize':
+                    user.status = 'authorized';
+                    user.authorized_at = new Date().toISOString();
+                    user.authorized_by = 'admin';
+                    break;
+                case 'reject':
+                    user.status = 'rejected';
+                    break;
+                case 'reset':
+                    user.status = 'pending';
+                    user.authorized_at = null;
+                    user.authorized_by = null;
+                    break;
             }
-        }
-
-        // 重置用户状态
-        function resetUser(userId) {
-            if (!confirm('确定要重置该用户的审核状态吗？')) return;
-
-            const result = authorizeUser(userId, 'reset');
-            if (result.success) {
-                loadUsers();
-            } else {
-                alert(result.message);
-            }
+            
+            users[userIndex] = user;
+            saveUsers(users);
+            
+            // 重新加载用户列表
+            loadUsers();
+            
+            const actionText = action === 'authorize' ? '授权' : action === 'reject' ? '拒绝' : '重置';
+            alert(`${actionText}操作成功！`);
         }
 
         // 初始化

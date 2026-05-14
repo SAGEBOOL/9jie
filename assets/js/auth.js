@@ -18,7 +18,14 @@ const bcrypt = {
 // ========== 用户操作 ==========
 function getUsers() {
     const data = localStorage.getItem(AUTH_KEYS.USERS);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    try {
+        return JSON.parse(data);
+    } catch (e) {
+        console.error('Failed to parse users data:', e);
+        localStorage.removeItem(AUTH_KEYS.USERS);
+        return [];
+    }
 }
 
 function saveUsers(users) {
@@ -157,36 +164,6 @@ function getAdminUserList() {
         users: users.map(({ password, ...user }) => user),
         pendingCount: users.filter(u => u.status === 'pending').length
     };
-}
-
-function authorizeUser(userId, action) {
-    const users = getUsers();
-    const userIndex = users.findIndex(u => u.id === parseInt(userId));
-
-    if (userIndex === -1) {
-        return { success: false, message: '用户不存在' };
-    }
-
-    const statusMap = { authorize: 'authorized', reject: 'rejected', reset: 'pending' };
-    const newStatus = statusMap[action];
-
-    if (!newStatus) {
-        return { success: false, message: '无效的操作' };
-    }
-
-    users[userIndex].status = newStatus;
-    users[userIndex].authorized_at = newStatus !== 'pending' ? new Date().toISOString() : null;
-    users[userIndex].authorized_by = newStatus !== 'pending' ? 'admin' : null;
-
-    saveUsers(users);
-
-    const messages = {
-        authorize: '用户已授权',
-        reject: '用户已被拒绝',
-        reset: '用户已重置为待审核'
-    };
-
-    return { success: true, message: messages[action] };
 }
 
 // ========== 初始化默认管理员 ==========
