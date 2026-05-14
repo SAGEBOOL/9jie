@@ -135,7 +135,18 @@ function loginUser(username, password) {
         return { success: false, message: '用户名或密码错误' };
     }
 
-    if (user.password !== safeBtoa(password)) {
+    // 密码比对（支持新旧编码向后兼容）
+    let passwordMatch = false;
+    if (user.password === safeBtoa(password)) {
+        passwordMatch = true;
+    } else if (user.password === btoa(password)) {
+        // 旧编码兼容：如果匹配成功，更新为新编码
+        passwordMatch = true;
+        user.password = safeBtoa(password);
+        saveUsers(users);
+    }
+
+    if (!passwordMatch) {
         return { success: false, message: '用户名或密码错误' };
     }
 
@@ -171,7 +182,22 @@ function loginAdmin(username, password) {
     const admins = getAdmins();
     const admin = admins.find(a => a.username === username);
 
-    if (!admin || admin.password !== safeBtoa(password)) {
+    if (!admin) {
+        return { success: false, message: '管理员用户名或密码错误' };
+    }
+
+    // 密码比对（支持新旧编码向后兼容）
+    let passwordMatch = false;
+    if (admin.password === safeBtoa(password)) {
+        passwordMatch = true;
+    } else if (admin.password === btoa(password)) {
+        // 旧编码兼容：如果匹配成功，更新为新编码
+        passwordMatch = true;
+        admin.password = safeBtoa(password);
+        saveAdmins(admins);
+    }
+
+    if (!passwordMatch) {
         return { success: false, message: '管理员用户名或密码错误' };
     }
 
