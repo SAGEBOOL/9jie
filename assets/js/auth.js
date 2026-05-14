@@ -5,13 +5,23 @@ const AUTH_KEYS = {
     CURRENT_USER: '9jie_current_user'
 };
 
+// 安全 Base64 编码（支持 Unicode/中文）
+function safeBtoa(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+// 安全 Base64 解码（支持 Unicode/中文）
+function safeAtob(str) {
+    return decodeURIComponent(escape(atob(str)));
+}
+
 const bcrypt = {
     hashSync: function(password, salt) {
         // 简单哈希（浏览器环境用 btoa 代替 bcrypt）
-        return btoa(password + salt);
+        return safeBtoa(password + salt);
     },
     compareSync: function(password, hash) {
-        return btoa(password + '10') === hash;
+        return safeBtoa(password + '10') === hash;
     }
 };
 
@@ -41,7 +51,7 @@ function getAdmins() {
             id: 1,
             username: 'HE-1',
             // 简单编码密码（生产环境请用更好方式）
-            password: btoa('HYH18800050565hd'),
+            password: safeBtoa('HYH18800050565hd'),
             created_at: new Date().toISOString()
         }];
         saveAdmins(admins);
@@ -81,7 +91,7 @@ function registerUser(username, password, email, phone) {
     const newUser = {
         id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
         username,
-        password: btoa(password),  // 简单编码（非加密，仅做存储）
+        password: safeBtoa(password),  // 安全编码（支持中文密码）
         email: email || null,
         phone: phone || null,
         status: 'authorized',  // 默认授权
@@ -112,7 +122,7 @@ function loginUser(username, password) {
         return { success: false, message: '用户名或密码错误' };
     }
 
-    if (user.password !== btoa(password)) {
+    if (user.password !== safeBtoa(password)) {
         return { success: false, message: '用户名或密码错误' };
     }
 
@@ -148,7 +158,7 @@ function loginAdmin(username, password) {
     const admins = getAdmins();
     const admin = admins.find(a => a.username === username);
 
-    if (!admin || admin.password !== btoa(password)) {
+    if (!admin || admin.password !== safeBtoa(password)) {
         return { success: false, message: '管理员用户名或密码错误' };
     }
 
