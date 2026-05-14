@@ -47,13 +47,26 @@ function getAdmins() {
     const data = localStorage.getItem(AUTH_KEYS.ADMINS);
     if (!data) {
         // 初始化管理员
-        const admins = [{
-            id: 1,
-            username: 'HE-1',
-            // 简单编码密码（生产环境请用更好方式）
-            password: safeBtoa('HYH18800050565hd'),
-            created_at: new Date().toISOString()
-        }];
+        const admins = [
+            {
+                id: 1,
+                username: 'HE-1',
+                password: safeBtoa('HYH18800050565hd'),
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                username: 'LIU',
+                password: safeBtoa('LIU20260514-1'),
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 3,
+                username: 'GAN',
+                password: safeBtoa('GAN20260514-2'),
+                created_at: new Date().toISOString()
+            }
+        ];
         saveAdmins(admins);
         return admins;
     }
