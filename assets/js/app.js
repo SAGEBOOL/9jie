@@ -56,7 +56,7 @@ const charactersData = [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
             { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
             { id: 'gandafu', name: '甘道夫', type: 'brother' },
-            { id: 'amei', name: '阿梅', type: 'lover' }
+            { id: 'linqing', name: '林清', type: 'lover' }
         ],
         stories: ['第11卷：修真初触', '第18卷：道心考验']
     },
@@ -148,22 +148,23 @@ const charactersData = [
         stories: ['第3卷：兄弟重聚', '第16卷：道门之争', '第22卷：和解同心']
     },
     {
-        id: 'amei',
-        name: '阿梅',
-        emoji: '👩‍🎤',
-        avatar: 'assets/images/阿梅.png',
+        id: 'linqing',
+        name: '林清',
+        emoji: '❄️',
+        avatar: 'assets/images/林清.png',
         camp: 'love',
         campName: '爱情线',
-        identity: '河一平行世界的红颜知己',
-        personality: '个性鲜明、敢爱敢恨',
-        abilities: ['平行世界感知', '情感共鸣'],
-        arc: '在平行世界中与河一的羁绊与守护',
-        systems: ['功法体系'],
+        identity: '河一的前世恋人，等待万年的守护者',
+        personality: '外冷内热、情绪因功法反噬时冷时热',
+        abilities: ['左手剑术', '冰心诀', '万年守候'],
+        arc: '以冷漠掩饰深情，在测试中确认河一是否就是"那个人"',
+        systems: ['功法体系', '灵根体系'],
+        storyPage: 'lin-qing.html',
         relations: [
             { id: 'heyi', name: '河一', type: 'lover' },
             { id: 'liulanglang', name: '刘浪浪', type: 'ally' }
         ],
-        stories: ['第7卷：平行相遇', '第14卷：羁绊加深']
+        stories: ['第7卷：平行相遇', '第14卷：羁绊加深', '隐藏卷：万年守候']
     },
     {
         id: 'xueyan',
