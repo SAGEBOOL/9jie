@@ -157,9 +157,27 @@ const charactersData = [
         arc: '在平行世界中与河一的羁绊与守护',
         systems: ['功法体系'],
         relations: [
-            { id: 'heyi', name: '河一', type: 'lover' }
+            { id: 'heyi', name: '河一', type: 'lover' },
+            { id: 'liulanglang', name: '刘浪浪', type: 'ally' }
         ],
         stories: ['第7卷：平行相遇', '第14卷：羁绊加深']
+    },
+    {
+        id: 'xueyan',
+        name: '血衍',
+        emoji: '🩸',
+        camp: 'antagonist',
+        campName: '反派',
+        identity: '黑暗核心化身',
+        personality: '冷酷无情、唯力量论',
+        abilities: ['黑暗能量', '腐蚀心智', '虚空召唤'],
+        arc: '作为黑暗面的代表，与主角终极对决',
+        systems: ['黑暗核心', '能源体系'],
+        relations: [
+            { id: 'xuanchen', name: '玄宸', type: 'ally' },
+            { id: 'liulanglang', name: '刘浪浪', type: 'enemy' }
+        ],
+        stories: ['第19卷：黑暗觉醒', '第30卷：终极对决']
     }
 ];
 
