@@ -97,6 +97,16 @@
             background: rgba(102, 126, 234, 0.3);
         }
 
+        .btn-wiki {
+            background: rgba(100, 255, 218, 0.2);
+            color: #64ffda;
+            border: 0.5px solid rgba(100, 255, 218, 0.3);
+        }
+
+        .btn-wiki:hover {
+            background: rgba(100, 255, 218, 0.3);
+        }
+
         /* 登录面板 */
         .login-panel {
             max-width: 420px;
@@ -484,6 +494,7 @@
                     <div class="badge">
                         待审核用户: <span id="pendingCount">0</span>
                     </div>
+                    <button class="btn btn-wiki" onclick="window.location.href='index.html'">进入百科</button>
                     <button class="btn btn-back" onclick="window.location.href='login.html'">返回登录页</button>
                     <button class="btn btn-logout" onclick="logout()">退出登录</button>
                 </div>
