@@ -284,11 +284,11 @@ function renderCharacters() {
     container.innerHTML = filtered.map(char => `
         <div class="character-card" 
              onclick="showCharacterDetail('${char.id}')">
-            <div class="h-32 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
-                ${char.avatar 
-                    ? `<img src="${char.avatar}" alt="${char.name}" class="w-16 h-16 rounded-full object-cover">`
-                    : `<span class="text-4xl">${char.emoji}</span>`
-                }
+        <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
+            ${char.avatar 
+                ? `<img src="${char.avatar}" alt="${char.name}" class="w-32 h-32 rounded-full object-contain">`
+                : `<span class="text-4xl">${char.emoji}</span>`
+            }
             </div>
             <div class="p-3">
                 <h3 class="font-bold text-lg" style="color: #ccd6f6;">${char.name}</h3>
@@ -323,7 +323,7 @@ function showCharacterDetail(charId) {
     
     // 设置标题（支持头像图片）
     if (char.avatar) {
-        title.innerHTML = `<img src="${char.avatar}" alt="${char.name}" class="w-8 h-8 rounded-full inline-block mr-2"> ${char.name}`;
+        title.innerHTML = `<img src="${char.avatar}" alt="${char.name}" class="w-16 h-16 rounded-full inline-block mr-2 align-middle"> ${char.name}`;
     } else {
         title.textContent = `${char.emoji} ${char.name}`;
     }
