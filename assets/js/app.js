@@ -286,7 +286,7 @@ function renderCharacters() {
              onclick="showCharacterDetail('${char.id}')">
         <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
             ${char.avatar 
-                ? `<img src="${char.avatar}" alt="${char.name}" class="w-32 h-32 rounded-full object-contain">`
+                ? `<img src="${char.avatar}" alt="${char.name}" class="w-32 h-auto rounded-xl object-contain" style="box-shadow: 0 8px 24px rgba(0,0,0,0.3); max-height: 140px;">`
                 : `<span class="text-4xl">${char.emoji}</span>`
             }
             </div>
@@ -323,7 +323,7 @@ function showCharacterDetail(charId) {
     
     // 设置标题（支持头像图片）
     if (char.avatar) {
-        title.innerHTML = `<img src="${char.avatar}" alt="${char.name}" class="w-16 h-16 rounded-full inline-block mr-2 align-middle"> ${char.name}`;
+        title.innerHTML = `<img src="${char.avatar}" alt="${char.name}" class="w-16 h-auto rounded-xl inline-block mr-2 align-middle" style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);"> ${char.name}`;
     } else {
         title.textContent = `${char.emoji} ${char.name}`;
     }
