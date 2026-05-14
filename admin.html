@@ -511,6 +511,16 @@
                     <div class="number" id="rejectedUsers">0</div>
                     <div class="label">已拒绝</div>
                 </div>
+                <div class="stat-card">
+                    <div class="icon">🔐</div>
+                    <div class="number" id="totalLogins">0</div>
+                    <div class="label">总登录次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🟢</div>
+                    <div class="number" id="activeToday">0</div>
+                    <div class="label">今日活跃</div>
+                </div>
             </div>
 
             <!-- 用户列表 -->
@@ -534,6 +544,9 @@
                             <th>邮箱</th>
                             <th>手机号</th>
                             <th>状态</th>
+                            <th>登录次数</th>
+                            <th>最后登录</th>
+                            <th>访问页面</th>
                             <th>注册时间</th>
                             <th>操作</th>
                         </tr>
@@ -620,6 +633,11 @@
             document.getElementById('authorizedUsers').textContent = users.filter(u => u.status === 'authorized').length;
             document.getElementById('rejectedUsers').textContent = users.filter(u => u.status === 'rejected').length;
             document.getElementById('pendingCount').textContent = users.filter(u => u.status === 'pending').length;
+
+            // 新增统计：总登录次数和今日活跃
+            const pageStatsData = getPageStats ? getPageStats() : { totalLogins: 0, activeToday: 0 };
+            document.getElementById('totalLogins').textContent = pageStatsData.totalLogins || users.reduce((sum, u) => sum + (u.login_count || 0), 0);
+            document.getElementById('activeToday').textContent = pageStatsData.activeToday || 0;
         }
 
         // 筛选用户
@@ -651,8 +669,12 @@
             }
 
             emptyState.style.display = 'none';
-            tbody.innerHTML = users.map(user => `
-                <tr>
+            tbody.innerHTML = users.map(user => {
+                const loginCount = user.login_count || 0;
+                const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString('zh-CN') : '-';
+                const pageViewsCount = user.page_views ? Object.values(user.page_views).reduce((a, b) => a + b, 0) : 0;
+
+                return `<tr>
                     <td>#${user.id}</td>
                     <td><strong>${user.username}</strong></td>
                     <td>${user.email || '-'}</td>
@@ -662,14 +684,17 @@
                             ${user.status === 'authorized' ? '已授权' : user.status === 'pending' ? '待审核' : '已拒绝'}
                         </span>
                     </td>
+                    <td>${loginCount}</td>
+                    <td>${lastLogin}</td>
+                    <td>${pageViewsCount}</td>
                     <td>${new Date(user.created_at).toLocaleString('zh-CN')}</td>
                     <td class="action-btns">
                         ${user.status !== 'authorized' ? `<button class="action-btn authorize" onclick="authorizeUser(${user.id}, 'authorize')">授权</button>` : ''}
                         ${user.status !== 'rejected' ? `<button class="action-btn reject" onclick="authorizeUser(${user.id}, 'reject')">拒绝</button>` : ''}
                         ${user.status !== 'pending' ? `<button class="action-btn reset" onclick="authorizeUser(${user.id}, 'reset')">重置</button>` : ''}
                     </td>
-                </tr>
-            `).join('');
+                </tr>`
+            }).join('');
         }
 
         // 授权/拒绝/重置用户
