@@ -634,34 +634,164 @@ function showCharacterDetail(charId) {
     `;
     
     modal.classList.remove('hidden');
+
+    // 初始化关系图谱拖拽交互
+    requestAnimationFrame(() => {
+        const svg = document.getElementById('relationGraphSvg');
+        if (svg) initGraphDrag(svg);
+    });
+}
+
+// ==================== 关系图谱拖拽交互 ====================
+let graphDrag = {
+    active: false,
+    nodeIndex: -1,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    moved: false
+};
+
+function getSVGCoordinates(svg, clientX, clientY) {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function handleGraphNodeClick(event, charId) {
+    if (graphDrag.moved) {
+        event.stopPropagation();
+        return;
+    }
+    showCharacterDetail(charId);
+}
+
+function initGraphDrag(svg) {
+    if (!svg || svg._dragInited) return;
+    svg._dragInited = true;
+
+    svg.addEventListener('mousedown', (e) => {
+        const node = e.target.closest('.graph-node');
+        if (!node) return;
+
+        const coords = getSVGCoordinates(svg, e.clientX, e.clientY);
+        graphDrag = {
+            active: true,
+            nodeIndex: parseInt(node.dataset.index),
+            startX: coords.x,
+            startY: coords.y,
+            currentX: parseFloat(node.dataset.ox),
+            currentY: parseFloat(node.dataset.oy),
+            moved: false
+        };
+
+        node.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+
+    svg.addEventListener('mousemove', (e) => {
+        if (!graphDrag.active) return;
+
+        const coords = getSVGCoordinates(svg, e.clientX, e.clientY);
+        const dx = coords.x - graphDrag.startX;
+        const dy = coords.y - graphDrag.startY;
+
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+            graphDrag.moved = true;
+        }
+
+        const newX = graphDrag.currentX + dx;
+        const newY = graphDrag.currentY + dy;
+        const idx = graphDrag.nodeIndex;
+
+        // 更新节点 transform
+        const node = svg.querySelector(`.graph-node[data-index="${idx}"]`);
+        if (node) {
+            node.setAttribute('transform', `translate(${dx}, ${dy})`);
+        }
+
+        // 更新连线终点
+        const centerX = 160, centerY = 110;
+        const lineGlow = svg.querySelector(`.graph-line-glow[data-line-index="${idx}"]`);
+        const lineDash = svg.querySelector(`.graph-line-dash[data-line-index="${idx}"]`);
+        if (lineGlow) { lineGlow.setAttribute('x2', newX); lineGlow.setAttribute('y2', newY); }
+        if (lineDash) { lineDash.setAttribute('x2', newX); lineDash.setAttribute('y2', newY); }
+
+        // 更新图标位置
+        const midX = (centerX + newX) / 2;
+        const midY = (centerY + newY) / 2;
+        const iconBg = svg.querySelector(`.graph-icon-bg[data-icon-index="${idx}"]`);
+        const iconText = svg.querySelector(`.graph-icon-text[data-icon-index="${idx}"]`);
+        if (iconBg) { iconBg.setAttribute('cx', midX); iconBg.setAttribute('cy', midY); }
+        if (iconText) { iconText.setAttribute('x', midX); iconText.setAttribute('y', midY + 1.8); }
+    });
+
+    svg.addEventListener('mouseup', () => {
+        if (!graphDrag.active) return;
+        graphDrag.active = false;
+
+        const node = svg.querySelector(`.graph-node[data-index="${graphDrag.nodeIndex}"]`);
+        if (node) {
+            node.style.cursor = 'grab';
+            // 固化 transform 到实际坐标
+            if (graphDrag.moved) {
+                const transform = node.getAttribute('transform');
+                const match = transform && transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+                if (match) {
+                    const finalX = graphDrag.currentX + parseFloat(match[1]);
+                    const finalY = graphDrag.currentY + parseFloat(match[2]);
+                    node.dataset.ox = finalX;
+                    node.dataset.oy = finalY;
+                    node.removeAttribute('transform');
+
+                    // 更新内部子元素坐标
+                    const circles = node.querySelectorAll('circle');
+                    const text = node.querySelector('text');
+                    circles.forEach(c => {
+                        c.setAttribute('cx', finalX);
+                        c.setAttribute('cy', finalY);
+                    });
+                    if (text) {
+                        const name = text.textContent;
+                        const textY = finalY + (name.length <= 2 ? 3.5 : 2.8);
+                        text.setAttribute('x', finalX);
+                        text.setAttribute('y', textY);
+                    }
+                }
+            }
+        }
+    });
+
+    svg.addEventListener('mouseleave', () => {
+        if (graphDrag.active) {
+            svg.dispatchEvent(new Event('mouseup'));
+        }
+    });
 }
 
 // 渲染迷你关系图谱
 function renderMiniGraph(char) {
     const relCount = char.relations.length;
     if (relCount === 0) return '<p class="text-center" style="color: #8892b0;">暂无关系数据</p>';
-    
-    // 画布尺寸 - 增大以确保完整显示
+
     const canvasWidth = 320;
     const canvasHeight = 220;
     const centerX = canvasWidth / 2;
     const centerY = canvasHeight / 2;
-    
-    // 节点参数
     const centerRadius = 26;
-    const nodeRadius = 22; // 增大以容纳文字
-    
-    // 连线长度：根据关系数量动态调整
+    const nodeRadius = 22;
+
     const minRadius = Math.min(70, (Math.min(canvasWidth, canvasHeight) / 2) - nodeRadius - 20);
     const maxRadius = Math.min(100, (Math.min(canvasWidth, canvasHeight) / 2) - nodeRadius - 10);
     const radiusStep = relCount > 1 ? (maxRadius - minRadius) / (relCount - 1) : 0;
-    
-    // SVG滤镜
+
     const svgFilters = `
         <defs>
             <filter id="frostedGlass" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/>
-                <feColorMatrix in="blur" type="matrix" 
+                <feColorMatrix in="blur" type="matrix"
                     values="1 0 0 0 0.1
                             0 1 0 0 0.1
                             0 0 1 0 0.15
@@ -677,13 +807,12 @@ function renderMiniGraph(char) {
             </filter>
         </defs>
     `;
-    
-    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full" style="min-height: 220px; max-height: 260px;">${svgFilters}`;
-    
+
+    let svg = `<svg id="relationGraphSvg" viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full" style="min-height: 220px; max-height: 260px; user-select: none;">${svgFilters}`;
+
     // 预计算所有外围节点位置
     const positions = char.relations.map((rel, index) => {
         const angle = (index / relCount) * Math.PI * 2 - Math.PI / 2;
-        // 长短不一：基础递增 + 小幅交替波动，确保协调
         const baseR = minRadius + index * radiusStep;
         const variation = (index % 2 === 0 ? 6 : -4);
         const radius = baseR + variation;
@@ -694,59 +823,51 @@ function renderMiniGraph(char) {
             color: getRelationColor(rel.type)
         };
     });
-    
+
     // 绘制关系线 + 图标
-    positions.forEach(pos => {
-        // 发光效果底层
-        svg += `<line x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}" 
-                    stroke="${pos.color}" stroke-width="3" opacity="0.15" filter="url(#glow)"/>`;
-        
-        // 点划线
-        svg += `<line x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}" 
-                    stroke="${pos.color}" stroke-width="1.5" opacity="0.6" 
-                    stroke-dasharray="4,3" stroke-linecap="round"/>`;
-        
-        // 关系类型图标（在线中间）
+    positions.forEach((pos, index) => {
         const midX = (centerX + pos.x) / 2;
         const midY = (centerY + pos.y) / 2;
         const icon = getRelationIcon(pos.rel.type);
-        svg += `<circle cx="${midX}" cy="${midY}" r="5.5" fill="rgba(0,0,0,0.7)" stroke="${pos.color}" stroke-width="1"/>`;
-        svg += `<text x="${midX}" y="${midY + 1.8}" text-anchor="middle" font-size="5.5" fill="${pos.color}">${icon}</text>`;
+
+        svg += `<line class="graph-line graph-line-glow" data-line-index="${index}"
+                    x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}"
+                    stroke="${pos.color}" stroke-width="3" opacity="0.15" filter="url(#glow)"/>`;
+        svg += `<line class="graph-line graph-line-dash" data-line-index="${index}"
+                    x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}"
+                    stroke="${pos.color}" stroke-width="1.5" opacity="0.6"
+                    stroke-dasharray="4,3" stroke-linecap="round"/>`;
+        svg += `<circle class="graph-icon-bg" data-icon-index="${index}"
+                    cx="${midX}" cy="${midY}" r="5.5" fill="rgba(0,0,0,0.7)" stroke="${pos.color}" stroke-width="1"/>`;
+        svg += `<text class="graph-icon-text" data-icon-index="${index}"
+                    x="${midX}" y="${midY + 1.8}" text-anchor="middle" font-size="5.5" fill="${pos.color}">${icon}</text>`;
     });
-    
-    // 绘制外围节点 + 可点击区域
-    positions.forEach(pos => {
-        // 外围节点（液态玻璃效果）
-        svg += `<circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="${pos.color}" filter="url(#frostedGlass)" opacity="0.85"/>`;
-        svg += `<circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-        
-        // 名字放在圆内 - 根据字数调整字号
+
+    // 绘制外围节点（可拖拽 + 可点击）
+    positions.forEach((pos, index) => {
         const name = pos.rel.name;
         const fontSize = name.length <= 2 ? 10 : 8;
         const textY = pos.y + (name.length <= 2 ? 3.5 : 2.8);
-        
-        // 可点击的文本 - 添加 onclick 事件
         const targetChar = charactersData.find(c => c.id === pos.rel.id);
-        if (targetChar) {
-            svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600" 
-                        style="cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3);" 
-                        onclick="event.stopPropagation(); showCharacterDetail('${pos.rel.id}')">${name}</text>`;
-        } else {
-            svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600">${name}</text>`;
-        }
+        const clickAction = targetChar ? `onclick="handleGraphNodeClick(event, '${pos.rel.id}')"` : '';
+
+        svg += `<g class="graph-node" data-index="${index}" data-char-id="${pos.rel.id}" data-ox="${pos.x}" data-oy="${pos.y}" style="cursor: grab;">
+            <circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="${pos.color}" filter="url(#frostedGlass)" opacity="0.85"/>
+            <circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+            <text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600" ${clickAction}>${name}</text>
+        </g>`;
     });
-    
+
     // 中心节点（主角）
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius + 3}" fill="rgba(102,126,234,0.2)" filter="url(#glow)"/>`;
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="#667eea" filter="url(#frostedGlass)" opacity="0.95"/>`;
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-    
-    // 中心名字 - 放在圆内
+
     const centerName = char.name;
     const centerFontSize = centerName.length <= 2 ? 12 : 10;
     const centerTextY = centerY + (centerName.length <= 2 ? 4 : 3);
     svg += `<text x="${centerX}" y="${centerTextY}" text-anchor="middle" font-size="${centerFontSize}" fill="white" font-weight="bold">${centerName}</text>`;
-    
+
     svg += '</svg>';
     return svg;
 }
