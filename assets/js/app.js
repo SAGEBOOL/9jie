@@ -51,6 +51,7 @@ const charactersData = [
         abilities: ['界域感知', '风水布局', '封闭派→开放派转变'],
         arc: '从封闭派信徒到开放派领袖的思想转变',
         systems: ['势力分布体系', '能源体系'],
+        storyPage: 'he-yi.html',
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
             { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
@@ -640,7 +641,8 @@ function renderCharacters() {
     
     container.innerHTML = filtered.map(char => `
         <div class="character-card" 
-             onclick="showCharacterDetail('${char.id}')">
+             onclick="if('${char.storyPage}') window.location.href='${char.storyPage}'; else showCharacterDetail('${char.id}')"
+             style="cursor: pointer;">
         <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
             ${char.avatar 
                 ? `<img src="${char.avatar}" alt="${char.name}" class="w-32 h-auto rounded-xl object-contain" style="box-shadow: 0 8px 24px rgba(0,0,0,0.3); max-height: 140px;">`
@@ -650,6 +652,7 @@ function renderCharacters() {
             <div class="p-3">
                 <h3 class="font-bold text-lg" style="color: #ccd6f6;">${char.name}</h3>
                 <p class="text-sm" style="color: #8892b0;">${char.campName}</p>
+                ${char.storyPage ? '<p class="text-xs mt-1" style="color: #64ffda;">📖 点击查看故事</p>' : ''}
             </div>
         </div>
     `).join('');
