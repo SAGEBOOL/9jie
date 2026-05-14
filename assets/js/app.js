@@ -133,6 +133,7 @@ const charactersData = [
         id: 'gandafu',
         name: '甘道夫',
         emoji: '⚔️',
+        avatar: 'assets/images/甘道夫.png',
         camp: 'protagonist',
         campName: '主角团/兄弟团',
         identity: '甘承春，武当修道同学/修真界道门大佬',
@@ -140,10 +141,12 @@ const charactersData = [
         abilities: ['修界门', '守护道统', '道门秘法'],
         arc: '从对立到和解，与主角兄弟同心共护九界',
         systems: ['功法体系', '势力分布体系'],
+        storyPage: 'gan-dao-fu.html',
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
             { id: 'heyi', name: '河一', type: 'brother' },
-            { id: 'zhangleisheng', name: '张雷生', type: 'brother' }
+            { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
+            { id: 'tiandaolaoren', name: '天道老人', type: 'ally' }
         ],
         stories: ['第3卷：兄弟重聚', '第16卷：道门之争', '第22卷：和解同心']
     },
