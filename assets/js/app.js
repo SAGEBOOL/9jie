@@ -468,6 +468,136 @@ const realmsData = [
     }
 ];
 
+// ==================== 九界层级结构 ====================
+const realmHierarchyData = {
+    nodes: [
+        { id: 'manhuang', name: '蛮荒界', x: 400, y: 530, color: '#8B7355', icon: '🏔️' },
+        { id: 'xu', name: '墟界', x: 460, y: 410, color: '#6B7B8D', icon: '🏚️' },
+        { id: 'ling', name: '灵界', x: 540, y: 290, color: '#4CAF50', icon: '🌿' },
+        { id: 'yao', name: '妖界', x: 340, y: 410, color: '#FF5722', icon: '🐺' },
+        { id: 'mo', name: '魔界', x: 400, y: 290, color: '#9C27B0', icon: '😈' },
+        { id: 'xian', name: '仙界', x: 280, y: 170, color: '#2196F3', icon: '☁️' },
+        { id: 'sheng', name: '圣界', x: 260, y: 50, color: '#FFC107', icon: '✨' },
+        { id: 'xu2', name: '虚界', x: 540, y: 170, color: '#00BCD4', icon: '🌀' },
+        { id: 'shiyuan', name: '始源界', x: 400, y: 50, color: '#E91E63', icon: '🌌' }
+    ],
+    edges: [
+        { from: 'manhuang', to: 'xu', label: '万兽城西郊' },
+        { from: 'xu', to: 'ling', label: '残魂渡口' },
+        { from: 'ling', to: 'yao', label: '万灵山' },
+        { from: 'yao', to: 'mo', label: '十万大山' },
+        { from: 'mo', to: 'xian', label: '心魔渊' },
+        { from: 'xian', to: 'sheng', label: '三十六洞天' },
+        { from: 'sheng', to: 'xu2', label: '光明圣山' },
+        { from: 'xu2', to: 'shiyuan', label: '时空夹缝' }
+    ]
+};
+
+function renderRealmHierarchy() {
+    let svg = document.getElementById('realm-hierarchy-svg');
+    if (!svg) {
+        const realmsSection = document.getElementById('realms');
+        const realmsContainer = document.getElementById('realms-container');
+        if (!realmsSection || !realmsContainer) return;
+        const wrapper = document.createElement('div');
+        wrapper.id = 'realm-hierarchy-wrapper';
+        wrapper.className = 'mb-12';
+        wrapper.innerHTML = `
+            <h3 class="text-xl font-bold text-center mb-4" style="color: #64ffda;">九界立体层级结构</h3>
+            <p class="text-center mb-6" style="color: #8892b0; font-size: 14px;">点击任意界域查看详情，连线表示界门连通方向</p>
+            <div class="flex justify-center">
+                <svg id="realm-hierarchy-svg" viewBox="0 0 800 600" class="w-full max-w-4xl" style="max-height: 500px; background: rgba(255,255,255,0.03); border-radius: 16px;"></svg>
+            </div>`;
+        realmsSection.insertBefore(wrapper, realmsContainer);
+        return renderRealmHierarchy();
+    }
+
+    svg.innerHTML = '';
+
+    // 绘制连线（界门）
+    realmHierarchyData.edges.forEach(edge => {
+        const fromNode = realmHierarchyData.nodes.find(n => n.id === edge.from);
+        const toNode = realmHierarchyData.nodes.find(n => n.id === edge.to);
+        if (!fromNode || !toNode) return;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromNode.x);
+        line.setAttribute('y1', fromNode.y);
+        line.setAttribute('x2', toNode.x);
+        line.setAttribute('y2', toNode.y);
+        line.setAttribute('stroke', '#667eea');
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-dasharray', '5,5');
+        line.setAttribute('opacity', '0.6');
+        svg.appendChild(line);
+
+        const midX = (fromNode.x + toNode.x) / 2;
+        const midY = (fromNode.y + toNode.y) / 2;
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', midX);
+        text.setAttribute('y', midY - 6);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#8892b0');
+        text.setAttribute('font-size', '9');
+        text.textContent = edge.label;
+        svg.appendChild(text);
+    });
+
+    // 绘制节点
+    realmHierarchyData.nodes.forEach(node => {
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('cx', node.x);
+        glow.setAttribute('cy', node.y);
+        glow.setAttribute('r', '28');
+        glow.setAttribute('fill', node.color);
+        glow.setAttribute('opacity', '0.2');
+        svg.appendChild(glow);
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x);
+        circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', '22');
+        circle.setAttribute('fill', node.color);
+        circle.setAttribute('stroke', '#fff');
+        circle.setAttribute('stroke-width', '2');
+        circle.style.cursor = 'pointer';
+        circle.addEventListener('click', () => showRealmFromHierarchy(node.id));
+        circle.addEventListener('mouseenter', function() { this.setAttribute('r', '26'); });
+        circle.addEventListener('mouseleave', function() { this.setAttribute('r', '22'); });
+        svg.appendChild(circle);
+
+        const iconText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        iconText.setAttribute('x', node.x);
+        iconText.setAttribute('y', node.y - 4);
+        iconText.setAttribute('text-anchor', 'middle');
+        iconText.setAttribute('fill', '#fff');
+        iconText.setAttribute('font-size', '14');
+        iconText.style.cursor = 'pointer';
+        iconText.addEventListener('click', () => showRealmFromHierarchy(node.id));
+        iconText.textContent = node.icon;
+        svg.appendChild(iconText);
+
+        const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        nameText.setAttribute('x', node.x);
+        nameText.setAttribute('y', node.y + 18);
+        nameText.setAttribute('text-anchor', 'middle');
+        nameText.setAttribute('fill', '#e0e0e0');
+        nameText.setAttribute('font-size', '11');
+        nameText.setAttribute('font-weight', 'bold');
+        nameText.style.cursor = 'pointer';
+        nameText.addEventListener('click', () => showRealmFromHierarchy(node.id));
+        nameText.textContent = node.name;
+        svg.appendChild(nameText);
+    });
+}
+
+function showRealmFromHierarchy(realmId) {
+    const target = document.getElementById('realm-detail-' + realmId);
+    if (!target) return;
+    target.closest('.realm-card').scrollIntoView({ behavior: 'smooth' });
+    target.classList.remove('hidden');
+}
+
 // ==================== 核心功能 ====================
 
 // 初始化
@@ -481,6 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSystems();
     renderRealms();
     renderStorylines();
+    renderRealmHierarchy();
     initSearch();
     initFilters();
     
