@@ -29,7 +29,7 @@ const charactersData = [
         relations: [
             { id: 'heyi', name: '河一', type: 'brother' },
             { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
-            { id: 'ganchengchun', name: '甘承春', type: 'ally' },
+            { id: 'gandafu', name: '甘道夫', type: 'brother' },
             { id: 'lingxi', name: '灵汐', type: 'lover' },
             { id: 'xuanchen', name: '玄宸', type: 'enemy' }
         ],
@@ -53,7 +53,9 @@ const charactersData = [
         systems: ['势力分布体系', '能源体系'],
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
-            { id: 'zhangleisheng', name: '张雷生', type: 'brother' }
+            { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
+            { id: 'gandafu', name: '甘道夫', type: 'brother' },
+            { id: 'amei', name: '阿梅', type: 'lover' }
         ],
         stories: ['第11卷：修真初触', '第18卷：道心考验']
     },
@@ -70,7 +72,8 @@ const charactersData = [
         systems: ['经济体系', '势力分布体系'],
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
-            { id: 'heyi', name: '河一', type: 'brother' }
+            { id: 'heyi', name: '河一', type: 'brother' },
+            { id: 'gandafu', name: '甘道夫', type: 'brother' }
         ],
         stories: ['第8卷：兄弟聚义', '第20卷：商业帝国']
     },
@@ -122,6 +125,41 @@ const charactersData = [
             { id: 'liulanglang', name: '刘浪浪', type: 'mentor' }
         ],
         stories: ['第2卷：入梦点拨', '第28卷：天道真相']
+    },
+    {
+        id: 'gandafu',
+        name: '甘道夫',
+        emoji: '⚔️',
+        camp: 'protagonist',
+        campName: '主角团/兄弟团',
+        identity: '甘承春，武当修道同学/修真界道门大佬',
+        personality: '稳重可靠、行事沉稳、有担当',
+        abilities: ['修界门', '守护道统', '道门秘法'],
+        arc: '从对立到和解，与主角兄弟同心共护九界',
+        systems: ['功法体系', '势力分布体系'],
+        relations: [
+            { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
+            { id: 'heyi', name: '河一', type: 'brother' },
+            { id: 'zhangleisheng', name: '张雷生', type: 'brother' }
+        ],
+        stories: ['第3卷：兄弟重聚', '第16卷：道门之争', '第22卷：和解同心']
+    },
+    {
+        id: 'amei',
+        name: '阿梅',
+        emoji: '👩‍🎤',
+        avatar: 'assets/images/阿梅.png',
+        camp: 'love',
+        campName: '爱情线',
+        identity: '河一平行世界的红颜知己',
+        personality: '个性鲜明、敢爱敢恨',
+        abilities: ['平行世界感知', '情感共鸣'],
+        arc: '在平行世界中与河一的羁绊与守护',
+        systems: ['功法体系'],
+        relations: [
+            { id: 'heyi', name: '河一', type: 'lover' }
+        ],
+        stories: ['第7卷：平行相遇', '第14卷：羁绊加深']
     }
 ];
 
