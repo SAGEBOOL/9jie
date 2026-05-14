@@ -641,19 +641,19 @@ function renderMiniGraph(char) {
     const relCount = char.relations.length;
     if (relCount === 0) return '<p class="text-center" style="color: #8892b0;">暂无关系数据</p>';
     
-    // 画布尺寸
-    const canvasWidth = 260;
-    const canvasHeight = 160;
+    // 画布尺寸 - 增大以确保完整显示
+    const canvasWidth = 320;
+    const canvasHeight = 220;
     const centerX = canvasWidth / 2;
     const centerY = canvasHeight / 2;
     
     // 节点参数
-    const centerRadius = 24;
-    const nodeRadius = 19; // 足够容纳2-3个汉字
+    const centerRadius = 26;
+    const nodeRadius = 22; // 增大以容纳文字
     
-    // 连线长度：自然的长短不一（范围 58-92，协调分布）
-    const minRadius = 58;
-    const maxRadius = 92;
+    // 连线长度：根据关系数量动态调整
+    const minRadius = Math.min(70, (Math.min(canvasWidth, canvasHeight) / 2) - nodeRadius - 20);
+    const maxRadius = Math.min(100, (Math.min(canvasWidth, canvasHeight) / 2) - nodeRadius - 10);
     const radiusStep = relCount > 1 ? (maxRadius - minRadius) / (relCount - 1) : 0;
     
     // SVG滤镜
@@ -678,7 +678,7 @@ function renderMiniGraph(char) {
         </defs>
     `;
     
-    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full h-full" style="min-height: 180px;">${svgFilters}`;
+    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full" style="min-height: 220px; max-height: 260px;">${svgFilters}`;
     
     // 预计算所有外围节点位置
     const positions = char.relations.map((rel, index) => {
@@ -714,7 +714,7 @@ function renderMiniGraph(char) {
         svg += `<text x="${midX}" y="${midY + 1.8}" text-anchor="middle" font-size="5.5" fill="${pos.color}">${icon}</text>`;
     });
     
-    // 绘制外围节点 + 圆内名字
+    // 绘制外围节点 + 可点击区域
     positions.forEach(pos => {
         // 外围节点（液态玻璃效果）
         svg += `<circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="${pos.color}" filter="url(#frostedGlass)" opacity="0.85"/>`;
@@ -722,9 +722,18 @@ function renderMiniGraph(char) {
         
         // 名字放在圆内 - 根据字数调整字号
         const name = pos.rel.name;
-        const fontSize = name.length <= 2 ? 9 : 7.5;
+        const fontSize = name.length <= 2 ? 10 : 8;
         const textY = pos.y + (name.length <= 2 ? 3.5 : 2.8);
-        svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600">${name}</text>`;
+        
+        // 可点击的文本 - 添加 onclick 事件
+        const targetChar = charactersData.find(c => c.id === pos.rel.id);
+        if (targetChar) {
+            svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600" 
+                        style="cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3);" 
+                        onclick="event.stopPropagation(); showCharacterDetail('${pos.rel.id}')">${name}</text>`;
+        } else {
+            svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600">${name}</text>`;
+        }
     });
     
     // 中心节点（主角）
@@ -734,7 +743,7 @@ function renderMiniGraph(char) {
     
     // 中心名字 - 放在圆内
     const centerName = char.name;
-    const centerFontSize = centerName.length <= 2 ? 11 : 9;
+    const centerFontSize = centerName.length <= 2 ? 12 : 10;
     const centerTextY = centerY + (centerName.length <= 2 ? 4 : 3);
     svg += `<text x="${centerX}" y="${centerTextY}" text-anchor="middle" font-size="${centerFontSize}" fill="white" font-weight="bold">${centerName}</text>`;
     
