@@ -412,21 +412,24 @@ function showCharacterDetail(charId) {
 
 // 渲染迷你关系图谱
 function renderMiniGraph(char) {
-    const graphContainer = document.createElement('div');
-    graphContainer.className = 'relative w-full h-48 rounded-lg overflow-hidden';
-    graphContainer.style.background = 'rgba(0, 0, 0, 0.3)';
-    
-    // 中心节点
-    const centerX = 50;
-    const centerY = 50;
-    
-    // 根据关系数量调整布局
     const relCount = char.relations.length;
+    
+    // 计算合适的画布尺寸和布局参数
+    const baseRadius = 42; // 基础半径，确保足够间距
+    const nodeRadius = Math.max(10, 12 - relCount * 0.5); // 节点半径，确保能显示名字
+    const centerRadius = Math.max(14, 16 - relCount * 0.3); // 中心节点半径
+    const fontSize = Math.max(5, 6.5 - relCount * 0.3); // 字体大小
+    const labelOffset = nodeRadius + 10; // 标签偏移量
+    
+    // 计算画布大小（确保不截断）
+    const canvasWidth = 200;
+    const canvasHeight = 120;
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2 - 5;
     
     // SVG滤镜：液态玻璃磨砂效果
     const svgFilters = `
         <defs>
-            <!-- 液态玻璃磨砂滤镜 -->
             <filter id="frostedGlass" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/>
                 <feColorMatrix in="blur" type="matrix" 
@@ -436,9 +439,8 @@ function renderMiniGraph(char) {
                             0 0 0 0.85 0" result="frosted"/>
                 <feComposite in="SourceGraphic" in2="frosted" operator="over"/>
             </filter>
-            <!-- 发光效果 -->
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                 <feMerge>
                     <feMergeNode in="coloredBlur"/>
                     <feMergeNode in="SourceGraphic"/>
@@ -447,71 +449,48 @@ function renderMiniGraph(char) {
         </defs>
     `;
     
-    let svg = `<svg viewBox="0 0 200 100" class="w-full h-full">${svgFilters}`;
-    
-    // 点划线图案定义
-    svg += `<defs>
-        <!-- 不同关系类型的点划线图案 -->
-        <pattern id="dash-brother" patternUnits="userSpaceOnUse" width="6" height="2" patternTransform="rotate(0)">
-            <line x1="0" y1="1" x2="4" y2="1" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round"/>
-        </pattern>
-        <pattern id="dash-enemy" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="4" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round"/>
-        </pattern>
-        <pattern id="dash-lover" patternUnits="userSpaceOnUse" width="6" height="2" patternTransform="rotate(0)">
-            <line x1="0" y1="1" x2="3" y2="1" stroke="#EC4899" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3,3"/>
-        </pattern>
-        <pattern id="dash-mentor" patternUnits="userSpaceOnUse" width="8" height="2" patternTransform="rotate(0)">
-            <line x1="0" y1="1" x2="2" y2="1" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2,2,2,2"/>
-        </pattern>
-        <pattern id="dash-ally" patternUnits="userSpaceOnUse" width="5" height="2" patternTransform="rotate(0)">
-            <line x1="0" y1="1" x2="2" y2="1" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2,3"/>
-        </pattern>
-    </defs>`;
+    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full h-full" style="min-height: 140px;">${svgFilters}`;
     
     // 绘制关系线（使用点划线）
     char.relations.forEach((rel, index) => {
         const angle = (index / relCount) * Math.PI * 2 - Math.PI / 2;
-        const radius = Math.min(32, 25 + relCount * 2); // 根据关系数量调整半径
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius * 0.75; // 椭圆布局
+        const x = centerX + Math.cos(angle) * baseRadius;
+        const y = centerY + Math.sin(angle) * baseRadius * 0.85; // 轻微椭圆
         
-        // 获取关系类型对应的颜色和点划线样式
         const color = getRelationColor(rel.type);
-        const dashType = getDashType(rel.type);
         
         // 绘制发光效果底层
         svg += `<line x1="${centerX}" y1="${centerY}" x2="${x}" y2="${y}" 
-                    stroke="${color}" stroke-width="3" opacity="0.2" filter="url(#glow)"/>`;
+                    stroke="${color}" stroke-width="3" opacity="0.15" filter="url(#glow)"/>`;
         
-        // 绘制点划线（带呼吸动效）
+        // 绘制点划线
         svg += `<line x1="${centerX}" y1="${centerY}" x2="${x}" y2="${y}" 
-                    stroke="${color}" stroke-width="1.2" opacity="0.7" 
-                    stroke-dasharray="4,3" stroke-linecap="round"
-                    class="relation-line"/>`;
+                    stroke="${color}" stroke-width="1.5" opacity="0.6" 
+                    stroke-dasharray="4,3" stroke-linecap="round"/>`;
         
         // 关系类型图标（在线中间）
         const midX = (centerX + x) / 2;
         const midY = (centerY + y) / 2;
         const icon = getRelationIcon(rel.type);
-        svg += `<circle cx="${midX}" cy="${midY}" r="4" fill="rgba(0,0,0,0.6)" stroke="${color}" stroke-width="0.8"/>`;
-        svg += `<text x="${midX}" y="${midY + 1.5}" text-anchor="middle" font-size="4" fill="${color}" font-weight="bold">${icon}</text>`;
+        svg += `<circle cx="${midX}" cy="${midY}" r="5" fill="rgba(0,0,0,0.7)" stroke="${color}" stroke-width="1"/>`;
+        svg += `<text x="${midX}" y="${midY + 1.5}" text-anchor="middle" font-size="5" fill="${color}">${icon}</text>`;
         
-        // 液态玻璃磨砂圆形节点（优化比例）
-        const nodeRadius = Math.max(6, Math.min(8, 7 - relCount * 0.3)); // 根据关系数量调整大小
-        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="${color}" filter="url(#frostedGlass)" class="cursor-pointer" opacity="0.9"/>`;
-        // 添加白色边框
-        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>`;
-        // 名字标签
-        svg += `<text x="${x}" y="${y + nodeRadius + 8}" text-anchor="middle" font-size="5.5" fill="#e0e0e0" font-weight="500" pointer-events="none">${rel.name}</text>`;
+        // 外围节点（液态玻璃效果）
+        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="${color}" filter="url(#frostedGlass)" opacity="0.85"/>`;
+        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+        
+        // 名字标签 - 完整显示，不截断
+        svg += `<text x="${x}" y="${y + labelOffset}" text-anchor="middle" font-size="${fontSize}" fill="#e0e0e0" font-weight="500">${rel.name}</text>`;
     });
     
-    // 中心节点（主角 - 稍大一些）
-    const centerRadius = Math.max(9, 10 - relCount * 0.2);
-    svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius + 2}" fill="rgba(102,126,234,0.3)" filter="url(#glow)"/>`;
+    // 中心节点（主角）
+    svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius + 3}" fill="rgba(102,126,234,0.2)" filter="url(#glow)"/>`;
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="#667eea" filter="url(#frostedGlass)" opacity="0.95"/>`;
-    svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>`;
-    svg += `<text x="${centerX}" y="${centerY + 3}" text-anchor="middle" font-size="5.5" fill="white" font-weight="bold">${char.name.slice(0, 3)}</text>`;
+    svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+    
+    // 中心名字 - 完整显示，不截断
+    const centerFontSize = Math.min(7, centerRadius * 0.45);
+    svg += `<text x="${centerX}" y="${centerY + centerFontSize * 0.35}" text-anchor="middle" font-size="${centerFontSize}" fill="white" font-weight="bold">${char.name}</text>`;
     
     svg += '</svg>';
     
