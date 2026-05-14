@@ -413,21 +413,24 @@ function showCharacterDetail(charId) {
 // 渲染迷你关系图谱
 function renderMiniGraph(char) {
     const relCount = char.relations.length;
+    if (relCount === 0) return '<p class="text-center" style="color: #8892b0;">暂无关系数据</p>';
     
-    // 计算合适的画布尺寸和布局参数
-    const baseRadius = 42; // 基础半径，确保足够间距
-    const nodeRadius = Math.max(10, 12 - relCount * 0.5); // 节点半径，确保能显示名字
-    const centerRadius = Math.max(14, 16 - relCount * 0.3); // 中心节点半径
-    const fontSize = Math.max(5, 6.5 - relCount * 0.3); // 字体大小
-    const labelOffset = nodeRadius + 10; // 标签偏移量
-    
-    // 计算画布大小（确保不截断）
-    const canvasWidth = 200;
-    const canvasHeight = 120;
+    // 画布尺寸
+    const canvasWidth = 260;
+    const canvasHeight = 160;
     const centerX = canvasWidth / 2;
-    const centerY = canvasHeight / 2 - 5;
+    const centerY = canvasHeight / 2;
     
-    // SVG滤镜：液态玻璃磨砂效果
+    // 节点参数
+    const centerRadius = 24;
+    const nodeRadius = 19; // 足够容纳2-3个汉字
+    
+    // 连线长度：自然的长短不一（范围 58-92，协调分布）
+    const minRadius = 58;
+    const maxRadius = 92;
+    const radiusStep = relCount > 1 ? (maxRadius - minRadius) / (relCount - 1) : 0;
+    
+    // SVG滤镜
     const svgFilters = `
         <defs>
             <filter id="frostedGlass" x="-50%" y="-50%" width="200%" height="200%">
@@ -449,38 +452,53 @@ function renderMiniGraph(char) {
         </defs>
     `;
     
-    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full h-full" style="min-height: 140px;">${svgFilters}`;
+    let svg = `<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}" class="w-full h-full" style="min-height: 180px;">${svgFilters}`;
     
-    // 绘制关系线（使用点划线）
-    char.relations.forEach((rel, index) => {
+    // 预计算所有外围节点位置
+    const positions = char.relations.map((rel, index) => {
         const angle = (index / relCount) * Math.PI * 2 - Math.PI / 2;
-        const x = centerX + Math.cos(angle) * baseRadius;
-        const y = centerY + Math.sin(angle) * baseRadius * 0.85; // 轻微椭圆
+        // 长短不一：基础递增 + 小幅交替波动，确保协调
+        const baseR = minRadius + index * radiusStep;
+        const variation = (index % 2 === 0 ? 6 : -4);
+        const radius = baseR + variation;
+        return {
+            x: centerX + Math.cos(angle) * radius,
+            y: centerY + Math.sin(angle) * radius * 0.92,
+            rel: rel,
+            color: getRelationColor(rel.type)
+        };
+    });
+    
+    // 绘制关系线 + 图标
+    positions.forEach(pos => {
+        // 发光效果底层
+        svg += `<line x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}" 
+                    stroke="${pos.color}" stroke-width="3" opacity="0.15" filter="url(#glow)"/>`;
         
-        const color = getRelationColor(rel.type);
-        
-        // 绘制发光效果底层
-        svg += `<line x1="${centerX}" y1="${centerY}" x2="${x}" y2="${y}" 
-                    stroke="${color}" stroke-width="3" opacity="0.15" filter="url(#glow)"/>`;
-        
-        // 绘制点划线
-        svg += `<line x1="${centerX}" y1="${centerY}" x2="${x}" y2="${y}" 
-                    stroke="${color}" stroke-width="1.5" opacity="0.6" 
+        // 点划线
+        svg += `<line x1="${centerX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}" 
+                    stroke="${pos.color}" stroke-width="1.5" opacity="0.6" 
                     stroke-dasharray="4,3" stroke-linecap="round"/>`;
         
         // 关系类型图标（在线中间）
-        const midX = (centerX + x) / 2;
-        const midY = (centerY + y) / 2;
-        const icon = getRelationIcon(rel.type);
-        svg += `<circle cx="${midX}" cy="${midY}" r="5" fill="rgba(0,0,0,0.7)" stroke="${color}" stroke-width="1"/>`;
-        svg += `<text x="${midX}" y="${midY + 1.5}" text-anchor="middle" font-size="5" fill="${color}">${icon}</text>`;
-        
+        const midX = (centerX + pos.x) / 2;
+        const midY = (centerY + pos.y) / 2;
+        const icon = getRelationIcon(pos.rel.type);
+        svg += `<circle cx="${midX}" cy="${midY}" r="5.5" fill="rgba(0,0,0,0.7)" stroke="${pos.color}" stroke-width="1"/>`;
+        svg += `<text x="${midX}" y="${midY + 1.8}" text-anchor="middle" font-size="5.5" fill="${pos.color}">${icon}</text>`;
+    });
+    
+    // 绘制外围节点 + 圆内名字
+    positions.forEach(pos => {
         // 外围节点（液态玻璃效果）
-        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="${color}" filter="url(#frostedGlass)" opacity="0.85"/>`;
-        svg += `<circle cx="${x}" cy="${y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+        svg += `<circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="${pos.color}" filter="url(#frostedGlass)" opacity="0.85"/>`;
+        svg += `<circle cx="${pos.x}" cy="${pos.y}" r="${nodeRadius}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
         
-        // 名字标签 - 完整显示，不截断
-        svg += `<text x="${x}" y="${y + labelOffset}" text-anchor="middle" font-size="${fontSize}" fill="#e0e0e0" font-weight="500">${rel.name}</text>`;
+        // 名字放在圆内 - 根据字数调整字号
+        const name = pos.rel.name;
+        const fontSize = name.length <= 2 ? 9 : 7.5;
+        const textY = pos.y + (name.length <= 2 ? 3.5 : 2.8);
+        svg += `<text x="${pos.x}" y="${textY}" text-anchor="middle" font-size="${fontSize}" fill="white" font-weight="600">${name}</text>`;
     });
     
     // 中心节点（主角）
@@ -488,12 +506,13 @@ function renderMiniGraph(char) {
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="#667eea" filter="url(#frostedGlass)" opacity="0.95"/>`;
     svg += `<circle cx="${centerX}" cy="${centerY}" r="${centerRadius}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
     
-    // 中心名字 - 完整显示，不截断
-    const centerFontSize = Math.min(7, centerRadius * 0.45);
-    svg += `<text x="${centerX}" y="${centerY + centerFontSize * 0.35}" text-anchor="middle" font-size="${centerFontSize}" fill="white" font-weight="bold">${char.name}</text>`;
+    // 中心名字 - 放在圆内
+    const centerName = char.name;
+    const centerFontSize = centerName.length <= 2 ? 11 : 9;
+    const centerTextY = centerY + (centerName.length <= 2 ? 4 : 3);
+    svg += `<text x="${centerX}" y="${centerTextY}" text-anchor="middle" font-size="${centerFontSize}" fill="white" font-weight="bold">${centerName}</text>`;
     
     svg += '</svg>';
-    
     return svg;
 }
 
