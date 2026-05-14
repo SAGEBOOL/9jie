@@ -198,6 +198,85 @@
         </div>
     </div>
 
+    <!-- 音乐播放器 -->
+    <div id="music-player" style="position: fixed; bottom: 80px; right: 20px; z-index: 100; display: none;">
+        <div style="background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06)); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 24px; padding: 20px; width: 280px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <span id="music-icon" style="font-size: 24px;">🎵</span>
+                    <div>
+                        <div style="color: #ccd6f6; font-size: 14px; font-weight: 500;">背景音乐</div>
+                        <div id="music-name" style="color: #8892b0; font-size: 12px;">月下孤城</div>
+                    </div>
+                </div>
+                <button onclick="toggleMusic()" style="background: none; border: none; color: #8892b0; font-size: 20px; cursor: pointer;">×</button>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="play-btn" onclick="togglePlay()" style="background: rgba(100, 255, 218, 0.2); border: none; color: #64ffda; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">▶️</button>
+                <div class="flex-1">
+                    <input type="range" id="volume-slider" min="0" max="100" value="50" onchange="changeVolume(this.value)" style="width: 100%; accent-color: #64ffda;">
+                    <div class="flex justify-between text-xs" style="color: #8892b0; margin-top: 4px;">
+                        <span>🔊</span>
+                        <span id="volume-text">50%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音乐控制按钮（右下角） -->
+    <button id="music-toggle-btn" onclick="showMusicPlayer()" style="position: fixed; bottom: 20px; right: 20px; z-index: 100; background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: white; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; font-size: 24px; box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4); display: flex; align-items: center; justify-content: center;">
+        🎵
+    </button>
+
+    <script>
+        // 音乐播放器功能
+        let musicPlayer = null;
+        let isPlaying = false;
+
+        function initMusic() {
+            musicPlayer = new Audio('assets/music/月下孤城.mp3');
+            musicPlayer.loop = true;
+            musicPlayer.volume = 0.5;
+        }
+
+        function showMusicPlayer() {
+            document.getElementById('music-player').style.display = 'block';
+            document.getElementById('music-toggle-btn').style.display = 'none';
+        }
+
+        function toggleMusic() {
+            document.getElementById('music-player').style.display = 'none';
+            document.getElementById('music-toggle-btn').style.display = 'flex';
+        }
+
+        function togglePlay() {
+            if (!musicPlayer) initMusic();
+            
+            if (isPlaying) {
+                musicPlayer.pause();
+                document.getElementById('play-btn').textContent = '▶️';
+                document.getElementById('music-icon').textContent = '🎵';
+            } else {
+                musicPlayer.play();
+                document.getElementById('play-btn').textContent = '⏸️';
+                document.getElementById('music-icon').textContent = '🎶';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function changeVolume(value) {
+            if (!musicPlayer) initMusic();
+            musicPlayer.volume = value / 100;
+            document.getElementById('volume-text').textContent = value + '%';
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            initMusic();
+        });
+    </script>
+
     <script src="assets/js/app.js"></script>
     <script>
         // 注册Service Worker
