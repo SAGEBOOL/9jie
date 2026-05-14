@@ -188,6 +188,26 @@ const charactersData = [
         stories: ['第10卷：界主登场', '第17卷：黑暗崛起', '第22卷：最终决战']
     },
     {
+        id: 'tiandaolaoren',
+        name: '天道老人',
+        emoji: '🔮',
+        avatar: 'assets/images/天道老人.png',
+        camp: 'mentor',
+        campName: '神秘引路人',
+        identity: '九界守护者 · 天道法则化身',
+        personality: '神秘莫测、智慧超群、亦正亦邪',
+        abilities: ['天道法则', '预言推演', '时空穿梭'],
+        arc: '引导主角团，揭露九界真相',
+        systems: ['功法体系', '能源体系', '灵根体系'],
+        storyPage: 'tian-dao-lao-ren.html',
+        relations: [
+            { id: 'liulanglang', name: '刘浪浪', type: 'mentor' },
+            { id: 'xuanchen', name: '玄宸', type: 'enemy' },
+            { id: 'gandafu', name: '甘道夫', type: 'ally' }
+        ],
+        stories: ['第2卷：入梦点拨', '第28卷：天道真相', '隐藏卷：守护者']
+    },
+    {
         id: 'xueyan',
         name: '血衍',
         emoji: '🩸',
