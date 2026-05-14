@@ -59,6 +59,7 @@
             <h1 class="text-xl font-bold text-title-gradient">九界修真</h1>
             <div class="hidden md:flex space-x-2">
                 <button onclick="scrollToSection('overview')" class="nav-btn px-3 py-1 rounded-full text-sm">总览</button>
+                <button onclick="scrollToSection('realms')" class="nav-btn px-3 py-1 rounded-full text-sm">九界</button>
                 <button onclick="scrollToSection('characters')" class="nav-btn px-3 py-1 rounded-full text-sm">人物</button>
                 <button onclick="scrollToSection('systems')" class="nav-btn px-3 py-1 rounded-full text-sm">体系</button>
                 <button onclick="scrollToSection('story')" class="nav-btn px-3 py-1 rounded-full text-sm">故事</button>
@@ -109,7 +110,18 @@
             </div>
         </section>
 
-        <!-- 模块2：人物图鉴 -->
+        <!-- 模块2：九界详解 -->
+        <section id="realms" class="mb-16 scroll-mt-20">
+            <h2 class="text-2xl font-bold text-center mb-8" style="color: #ccd6f6;">九界世界观</h2>
+            <p class="text-center mb-8" style="color: #8892b0;">九层世界，从蛮荒到始源，每一界都有独特的法则与秘密</p>
+            
+            <!-- 九界卡片容器 -->
+            <div id="realms-container" class="space-y-6">
+                <!-- 动态渲染 -->
+            </div>
+        </section>
+
+        <!-- 模块3：人物图鉴 -->
         <section id="characters" class="mb-16 scroll-mt-20">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold" style="color: #ccd6f6;">人物图鉴</h2>

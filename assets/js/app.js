@@ -4,6 +4,7 @@
 const state = {
     characters: [],
     systems: [],
+    realms: [],
     storylines: [],
     currentCharacter: null,
     filters: {
@@ -244,16 +245,185 @@ const storylineData = [
     }
 ];
 
+// ==================== 九界数据 ====================
+const realmsData = [
+    {
+        id: 'manhuang',
+        name: '蛮荒界',
+        tier: '下三界',
+        position: 1,
+        ling_qi: '1%',
+        time_flow: '1:1（标准时间）',
+        limit: '结丹期',
+        race: '人类为主',
+        rule: '蛮荒法则',
+        description: '九界的起点，灵气稀薄，凶兽横行。人类在城池中艰难求存，强者为尊的世界。',
+        environment: ['莽荒大地，山脉连绵', '凶兽横行，最强可达结丹期', '灵气稀薄，修炼困难', '人类聚居于城池之中'],
+        factions: ['万兽宗（最大宗门）', '各大家族（河家、谢家等）', '散修联盟'],
+        locations: [
+            {'name': '万兽城', 'desc': '蛮荒界最大城池，万兽宗所在地'},
+            {'name': '边陲小镇', 'desc': '河一出生地'},
+            {'name': '墟界入口', 'desc': '通往墟界的界门'}
+        ],
+        color: '#8B7355',
+        icon: '🏔️'
+    },
+    {
+        id: 'xu',
+        name: '墟界',
+        subtitle: '归墟',
+        tier: '下三界',
+        position: 2,
+        ling_qi: '5%',
+        time_flow: '1:3（蛮荒界1天=墟界3天）',
+        limit: '元婴期',
+        race: '人类、幽灵',
+        rule: '废墟法则',
+        description: '上古遗迹之地，废墟遍地，时空扭曲。隐藏着上古宝藏，也潜伏着未知危险。',
+        environment: ['废墟遍地，残垣断壁', '上古文明的遗迹', '时空扭曲，有些区域时间倒流', '隐藏着上古宝藏'],
+        factions: ['残魂渡（神秘组织）', '废墟行者公会', '各大探险队'],
+        locations: [
+            {'name': '墟界石碑', 'desc': '河一触发机关的地方'},
+            {'name': '残魂渡', 'desc': '神秘的渡口，连接过去与未来'},
+            {'name': '上古遗迹', 'desc': '隐藏宝藏和危险'}
+        ],
+        color: '#6B7B8D',
+        icon: '🏚️'
+    },
+    {
+        id: 'ling',
+        name: '灵界',
+        tier: '中三界',
+        position: 3,
+        ling_qi: '15%',
+        time_flow: '1:5（蛮荒界1天=灵界5天）',
+        limit: '化神期',
+        race: '万灵共存',
+        rule: '自然法则',
+        description: '万灵共生的世界，山水相依，灵气充沛。人类、精怪、花草树木皆可修炼。',
+        environment: ['山水相依，灵气充沛', '万灵共存：人类、精怪、花草树木皆可修炼', '四季如春，气候宜人'],
+        factions: ['万灵盟（人类与精怪联盟）', '自然神殿', '灵植培育协会'],
+        locations: [],
+        color: '#4CAF50',
+        icon: '🌿'
+    },
+    {
+        id: 'yao',
+        name: '妖界',
+        tier: '中三界',
+        position: 4,
+        ling_qi: '20%',
+        time_flow: '1:10（蛮荒界1年=妖界1年，但妖界1年=蛮荒界10年）',
+        limit: '炼虚期',
+        race: '妖族为主',
+        rule: '血脉法则',
+        description: '妖族统治的世界，山林密布，弱肉强食。人类是少数族群，血脉决定一切。',
+        environment: ['蛮荒异域，山林密布', '妖族统治，人类是少数', '弱肉强食，法则残酷'],
+        factions: ['万妖国', '妖盟', '妖族十大氏族'],
+        locations: [],
+        color: '#FF5722',
+        icon: '🐺'
+    },
+    {
+        id: 'mo',
+        name: '魔界',
+        tier: '中三界',
+        position: 5,
+        ling_qi: '25%',
+        time_flow: '扭曲不定',
+        limit: '大乘期',
+        race: '魔族为主',
+        rule: '心魔法则',
+        description: '黑暗笼罩的世界，魔气弥漫。修炼魔功必须直面心魔，黑市交易盛行。',
+        environment: ['黑暗笼罩，昼夜不分', '魔气弥漫，可侵蚀心智', '空间扭曲，方向感失效'],
+        factions: ['魔道十宗', '心魔殿', '黑暗议会'],
+        locations: [],
+        color: '#9C27B0',
+        icon: '😈'
+    },
+    {
+        id: 'xian',
+        name: '仙界',
+        tier: '上三界',
+        position: 6,
+        ling_qi: '50%',
+        time_flow: '1:30（蛮荒界1天=仙界1月）',
+        limit: '大乘期',
+        race: '仙族',
+        rule: '仙道法则',
+        description: '云端之上的仙境，灵气化液，仙山连绵。等级森严，仙道正宗。',
+        environment: ['云端之上，仙山连绵', '灵气化液，随处可见灵泉', '美轮美奂，如同仙境'],
+        factions: ['三十六洞天', '七十二福地', '仙庭'],
+        locations: [],
+        color: '#2196F3',
+        icon: '☁️'
+    },
+    {
+        id: 'sheng',
+        name: '圣界',
+        tier: '上三界',
+        position: 7,
+        ling_qi: '45%',
+        time_flow: '1:90（蛮荒界1天=圣界3月）',
+        limit: '大乘期',
+        race: '圣族',
+        rule: '光明法则',
+        description: '光明普照的世界，圣殿林立，秩序井然。圣族血脉才能修炼最高圣法。',
+        environment: ['光明普照，没有黑暗', '圣殿林立，秩序井然', '一草一木都蕴含圣光'],
+        factions: ['圣庭', '圣光教会', '十二圣殿'],
+        locations: [],
+        color: '#FFC107',
+        icon: '✨'
+    },
+    {
+        id: 'xu2',
+        name: '虚界',
+        tier: '特殊界',
+        position: 8,
+        ling_qi: '未知',
+        time_flow: '可正可逆',
+        limit: '未知',
+        race: '未知',
+        rule: '时空法则',
+        description: '不存在于任何地图上的时空夹缝，规则紊乱，物理法则失效。极度危险！',
+        environment: ['不存在于任何地图上', '时空碎片漂浮', '规则紊乱，物理法则失效'],
+        factions: [],
+        locations: [],
+        color: '#00BCD4',
+        icon: '🌀'
+    },
+    {
+        id: 'shiyuan',
+        name: '始源界',
+        tier: '最高界',
+        position: 9,
+        ling_qi: '100%（混沌灵气）',
+        time_flow: '无时间概念',
+        limit: '无上限',
+        race: '混沌',
+        rule: '混沌法则',
+        description: '万物的终点，也是起点。混沌一片，无天无地。藏着宇宙起源的秘密，九界大劫的终点。',
+        environment: ['混沌一片，无天无地', '万物的终点，也是起点', '据说一切生命都起源于此'],
+        factions: [],
+        locations: [],
+        color: '#E91E63',
+        icon: '🌌',
+        mystery: ['为什么九界会定期"归尘"？', '始源界中有什么？', '谁能掌控始源界，谁就能掌控九界的命运。']
+    }
+];
+
 // ==================== 核心功能 ====================
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     state.characters = charactersData;
     state.systems = systemsData;
+    state.realms = realmsData;
     state.storylines = storylineData;
     
     renderCharacters();
     renderSystems();
+    renderRealms();
     renderStorylines();
     initSearch();
     initFilters();
@@ -695,6 +865,131 @@ function renderStorylines() {
     `;
     
     storySection.insertAdjacentHTML('afterbegin', timelineHTML);
+}
+
+// 渲染九界
+function renderRealms() {
+    const container = document.getElementById('realms-container');
+    if (!container) return;
+    
+    container.innerHTML = state.realms.map((realm, index) => `
+        <div class="realm-card" style="
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 0.5px solid rgba(255, 255, 255, 0.18);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 
+                inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+                0 8px 32px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        " onmouseover="this.style.transform='translateY(-5px) scale(1.01)'; this.style.boxShadow='inset 0 1px 2px rgba(255,255,255,0.2), inset 0 -1px 1px rgba(0,0,0,0.1), 0 15px 40px rgba(0,0,0,0.35), 0 0 30px ${realm.color}40';"
+           onmouseout="this.style.transform=''; this.style.boxShadow='inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.25)';"
+           onclick="toggleRealmDetail('${realm.id}')">
+            
+            <!-- 界的层级标签 -->
+            <div class="flex justify-between items-start mb-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold" style="background: rgba(255,255,255,0.1); color: #8892b0;">
+                    ${realm.tier}
+                </span>
+                <span class="text-3xl">${realm.icon}</span>
+            </div>
+            
+            <!-- 界名与序号 -->
+            <div class="flex items-center mb-3">
+                <span class="text-4xl font-bold mr-3" style="color: ${realm.color};">${realm.position}</span>
+                <div>
+                    <h3 class="text-xl font-bold" style="color: #ccd6f6;">${realm.name}</h3>
+                    ${realm.subtitle ? `<p class="text-sm" style="color: #8892b0;">${realm.subtitle}</p>` : ''}
+                </div>
+            </div>
+            
+            <!-- 核心属性 -->
+            <div class="space-y-2 mb-4 text-sm">
+                <div class="flex justify-between">
+                    <span style="color: #8892b0;">灵气浓度</span>
+                    <span style="color: #64ffda; font-weight: 600;">${realm.ling_qi}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span style="color: #8892b0;">时间流速</span>
+                    <span style="color: #ccd6f6; font-size: 0.85rem;">${realm.time_flow}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span style="color: #8892b0;">修炼上限</span>
+                    <span style="color: #ff9f1c; font-weight: 600;">${realm.limit}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span style="color: #8892b0;">主要种族</span>
+                    <span style="color: #ccd6f6;">${realm.race}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span style="color: #8892b0;">核心法则</span>
+                    <span style="color: ${realm.color}; font-weight: 600;">${realm.rule}</span>
+                </div>
+            </div>
+            
+            <!-- 描述 -->
+            <p class="text-sm mb-4" style="color: #8892b0; line-height: 1.6;">${realm.description}</p>
+            
+            <!-- 展开详情按钮 -->
+            <div class="text-center">
+                <span class="text-xs" style="color: #64ffda; opacity: 0.8;">点击查看详情 →</span>
+            </div>
+            
+            <!-- 详情区域（默认隐藏） -->
+            <div id="realm-detail-${realm.id}" class="hidden mt-4 pt-4" style="border-top: 0.5px solid rgba(255, 255, 255, 0.1);">
+                ${realm.environment.length > 0 ? `
+                    <div class="mb-3">
+                        <h4 class="text-sm font-bold mb-2" style="color: #64ffda;">🌍 环境特征</h4>
+                        ${realm.environment.map(e => `
+                            <p class="text-xs mb-1" style="color: #8892b0;">• ${e}</p>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${realm.factions.length > 0 ? `
+                    <div class="mb-3">
+                        <h4 class="text-sm font-bold mb-2" style="color: #64ffda;">⚔️ 主要势力</h4>
+                        ${realm.factions.map(f => `
+                            <span class="inline-block px-2 py-1 rounded-lg text-xs mr-1 mb-1" style="background: rgba(255,255,255,0.08); color: #ccd6f6;">${f}</span>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${realm.locations.length > 0 ? `
+                    <div class="mb-3">
+                        <h4 class="text-sm font-bold mb-2" style="color: #64ffda;">📍 重要地点</h4>
+                        ${realm.locations.map(l => `
+                            <div class="mb-2 p-2 rounded-lg" style="background: rgba(255,255,255,0.06);">
+                                <p class="text-xs font-bold" style="color: #ccd6f6;">${l.name}</p>
+                                <p class="text-xs" style="color: #8892b0;">${l.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${realm.mystery ? `
+                    <div class="mt-3 p-3 rounded-lg" style="background: rgba(233, 30, 99, 0.1); border: 0.5px solid rgba(233, 30, 99, 0.3);">
+                        <h4 class="text-sm font-bold mb-2" style="color: #e91e63;">🔮 终极之谜</h4>
+                        ${realm.mystery.map(m => `
+                            <p class="text-xs mb-1" style="color: #f48fb1;">${m}</p>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// 切换九界详情显示
+function toggleRealmDetail(realmId) {
+    const detail = document.getElementById('realm-detail-' + realmId);
+    if (detail) {
+        detail.classList.toggle('hidden');
+    }
 }
 
 // 获取剧情颜色
