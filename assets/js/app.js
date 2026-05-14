@@ -71,6 +71,7 @@ const charactersData = [
         abilities: ['资源调配', '经济操控', '情报网络'],
         arc: '从商会少主到跨九界商业帝国掌门人',
         systems: ['经济体系', '势力分布体系'],
+        storyPage: 'zhang-leisheng.html',
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
             { id: 'heyi', name: '河一', type: 'brother' },
@@ -89,6 +90,7 @@ const charactersData = [
         abilities: ['医术', '炼丹', '治愈'],
         arc: '从战国公主到刘浪浪道侣的成长之路',
         systems: ['天材地宝体系', '功法体系'],
+        storyPage: 'ling-xi.html',
         relations: [
             { id: 'liulanglang', name: '刘浪浪', type: 'lover' }
         ],
