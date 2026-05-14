@@ -167,6 +167,27 @@ const charactersData = [
         stories: ['第7卷：平行相遇', '第14卷：羁绊加深', '隐藏卷：万年守候']
     },
     {
+        id: 'xuanchen',
+        name: '玄宸',
+        emoji: '😈',
+        avatar: 'assets/images/玄宸.png',
+        camp: 'antagonist',
+        campName: '反派阵营',
+        identity: '九界之主 · 黑暗势力统治者',
+        personality: '冷酷无情、野心勃勃、智谋深远',
+        abilities: ['九界法则操控', '黑暗功法', '时空封锁'],
+        arc: '从守护者堕落为统治者，最终被主角团击败',
+        systems: ['势力分布体系', '黑暗体系', '功法体系'],
+        storyPage: 'xuan-chen.html',
+        relations: [
+            { id: 'liulanglang', name: '刘浪浪', type: 'enemy' },
+            { id: 'heyi', name: '河一', type: 'enemy' },
+            { id: 'tiandaolaoren', name: '天道老人', type: 'enemy' },
+            { id: 'xueyan', name: '血衍', type: 'ally' }
+        ],
+        stories: ['第10卷：界主登场', '第17卷：黑暗崛起', '第22卷：最终决战']
+    },
+    {
         id: 'xueyan',
         name: '血衍',
         emoji: '🩸',
