@@ -98,39 +98,6 @@ const charactersData = [
         stories: ['第5卷：初相遇', '第12卷：医者仁心']
     },
     {
-        id: 'xuanchen',
-        name: '玄宸',
-        emoji: '👑',
-        camp: 'antagonist',
-        campName: '界主/反派',
-        identity: '仙界界主/旧秩序守护者',
-        personality: '冷酷威严、秩序至上',
-        abilities: ['仙界法则', '能量压制', '界域封锁'],
-        arc: '维护旧秩序与主角开放理念的终极对抗',
-        systems: ['能源体系', '势力分布体系', '黑暗核心'],
-        relations: [
-            { id: 'liulanglang', name: '刘浪浪', type: 'enemy' },
-            { id: 'xueyan', name: '血衍', type: 'ally' }
-        ],
-        stories: ['第25卷：仙界对峙', '第30卷：终极对决']
-    },
-    {
-        id: 'tiandaolaoren',
-        name: '天道老人',
-        emoji: '🧘',
-        camp: 'special',
-        campName: '特殊角色',
-        identity: '三不原则/入梦点拨',
-        personality: '超然物外、深不可测',
-        abilities: ['入梦点拨', '天道推演', '能量观测'],
-        arc: '作为主角成长道路上的神秘引路人',
-        systems: ['能源体系', '灵根体系'],
-        relations: [
-            { id: 'liulanglang', name: '刘浪浪', type: 'mentor' }
-        ],
-        stories: ['第2卷：入梦点拨', '第28卷：天道真相']
-    },
-    {
         id: 'gandafu',
         name: '甘道夫',
         emoji: '⚔️',
