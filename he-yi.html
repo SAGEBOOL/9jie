@@ -123,6 +123,12 @@
             transform: scale(1.1);
         }
         
+        /* 黑胶唱片旋转动画 */
+        @keyframes vinylRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             .story-header {
                 padding: 24px;
@@ -476,8 +482,8 @@
                 
                 <!-- 当前播放信息 -->
                 <div class="flex items-center gap-4 mb-6">
-                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden;">
-                        <img src="assets/images/podcast-cover.png" alt="播客封面" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
+                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden; animation: vinylRotate 3s linear infinite; animation-play-state: paused;">
+                        <img src="assets/images/podcast-cover.png" alt="播客封面" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
                     </div>
                     <div class="flex-1">
                         <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
@@ -670,6 +676,9 @@
             isPodcastPlaying = true;
             document.getElementById('podcast-play-btn').textContent = '⏸️';
             
+            // 启动黑胶唱片旋转动画
+            document.getElementById('podcast-cover').style.animationPlayState = 'running';
+            
             // 自动播放背景音乐（5%音量）
             initBgMusic();
             bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
@@ -688,6 +697,8 @@
                     isPodcastPlaying = false;
                     document.getElementById('podcast-play-btn').textContent = '▶️';
                     if (bgMusic) bgMusic.pause();
+                    // 暂停黑胶唱片旋转动画
+                    document.getElementById('podcast-cover').style.animationPlayState = 'paused';
                 }
             });
         }
@@ -704,11 +715,15 @@
                 isPodcastPlaying = false;
                 document.getElementById('podcast-play-btn').textContent = '▶️';
                 if (bgMusic) bgMusic.pause();
+                // 暂停黑胶唱片旋转动画
+                document.getElementById('podcast-cover').style.animationPlayState = 'paused';
             } else {
                 podcastAudio.play();
                 isPodcastPlaying = true;
                 document.getElementById('podcast-play-btn').textContent = '⏸️';
                 if (bgMusic) bgMusic.play().catch(e => {});
+                // 恢复黑胶唱片旋转动画
+                document.getElementById('podcast-cover').style.animationPlayState = 'running';
             }
         }
         
@@ -757,12 +772,17 @@
         }
         
         function getPodcastShareText() {
-            const trackName = currentPodcastIndex >= 0 ? podcastList[currentPodcastIndex].name : '河一有声书';
-            return '正在收听「九界修真」' + trackName + ' — 云希（男声）朗读版';
+            if (currentPodcastIndex < 0) {
+                return '【九界修真】河一声书 - 云希（男声）朗读版，欢迎收听！';
+            }
+            const trackName = podcastList[currentPodcastIndex].name;
+            const trackDesc = podcastList[currentPodcastIndex].desc;
+            return '【九界修真】' + trackName + ' — ' + trackDesc + '\n🎧 欢迎收听河一声书';
         }
         
         function getPodcastShareUrl() {
-            return window.location.href;
+            // 只分享播客板块，不包含页面其他内容
+            return window.location.href.split('#')[0] + '#podcast-player';
         }
         
         function copyPodcastLink() {
