@@ -551,6 +551,36 @@
                                 <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
                             </div>
                         </div>
+                        
+                        <!-- 曲目4 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="3"
+                             onclick="playPodcast(3)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第五章：墟界遗址</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 曲目5 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="4"
+                             onclick="playPodcast(4)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第六章：归来者</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -565,7 +595,9 @@
         const podcastList = [
             { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', desc: '约 1300 字 | 云希（男声）', icon: '📖' },
             { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', desc: '约 1800 字 | 云希（男声）', icon: '📖' },
-            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', desc: '云希（男声）', icon: '🎧' }
+            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', desc: '云希（男声）', icon: '🎧' },
+            { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', desc: '云希（男声）', icon: '📖' },
+            { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', desc: '云希（男声）', icon: '📖' }
         ];
         
         let currentPodcastIndex = -1;
