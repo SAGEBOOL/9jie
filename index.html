@@ -51,7 +51,12 @@
             50% { background-position: 200% center; }
         }
 
-        /* 像素时钟样式 */
+        /* 像素时钟：整体缩放到 80% */
+        #pixel-clock {
+            transform: scale(0.8);
+            transform-origin: left center;
+        }
+
         .digit-container {
             display: grid;
             grid-template-columns: repeat(4, 0.2rem);
@@ -85,6 +90,22 @@
             box-shadow: 0 0 4px rgba(100, 255, 218, 0.5);
         }
 
+        /* 日期行：更小的像素块 */
+        .date-digit {
+            grid-template-columns: repeat(4, 0.14rem);
+            grid-template-rows: repeat(7, 0.14rem);
+            gap: 0.03rem;
+        }
+
+        .date-sep {
+            width: 0.14rem;
+            height: 0.14rem;
+            background-color: #64ffda;
+            border-radius: 1px;
+            align-self: center;
+            margin: 0 1px;
+        }
+
         /* 移动端隐藏秒数和第二个冒号 */
         @media (max-width: 768px) {
             #seconds-tens,
@@ -102,21 +123,37 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-xl font-bold text-title-gradient whitespace-nowrap">九界修真</h1>
                 <!-- 像素时钟 -->
-                <div id="pixel-clock" class="flex items-center" style="gap: 2px;">
-                    <div class="digit-container" id="hours-tens"></div>
-                    <div class="digit-container" id="hours-ones"></div>
-                    <div class="colon" id="colon-hm">
-                        <div class="colon-dot"></div>
-                        <div class="colon-dot"></div>
+                <div id="pixel-clock">
+                    <!-- 日期行：YYYY-MM-DD -->
+                    <div id="date-row" class="flex items-center justify-center" style="gap: 1px; margin-bottom: 2px;">
+                        <div class="digit-container date-digit" id="year-thousands"></div>
+                        <div class="digit-container date-digit" id="year-hundreds"></div>
+                        <div class="digit-container date-digit" id="year-tens"></div>
+                        <div class="digit-container date-digit" id="year-ones"></div>
+                        <div class="date-sep"></div>
+                        <div class="digit-container date-digit" id="month-tens"></div>
+                        <div class="digit-container date-digit" id="month-ones"></div>
+                        <div class="date-sep"></div>
+                        <div class="digit-container date-digit" id="day-tens"></div>
+                        <div class="digit-container date-digit" id="day-ones"></div>
                     </div>
-                    <div class="digit-container" id="minutes-tens"></div>
-                    <div class="digit-container" id="minutes-ones"></div>
-                    <div class="colon" id="colon-ms">
-                        <div class="colon-dot"></div>
-                        <div class="colon-dot"></div>
+                    <!-- 时间行：HH:MM:SS -->
+                    <div id="time-row" class="flex items-center" style="gap: 2px;">
+                        <div class="digit-container" id="hours-tens"></div>
+                        <div class="digit-container" id="hours-ones"></div>
+                        <div class="colon" id="colon-hm">
+                            <div class="colon-dot"></div>
+                            <div class="colon-dot"></div>
+                        </div>
+                        <div class="digit-container" id="minutes-tens"></div>
+                        <div class="digit-container" id="minutes-ones"></div>
+                        <div class="colon" id="colon-ms">
+                            <div class="colon-dot"></div>
+                            <div class="colon-dot"></div>
+                        </div>
+                        <div class="digit-container" id="seconds-tens"></div>
+                        <div class="digit-container" id="seconds-ones"></div>
                     </div>
-                    <div class="digit-container" id="seconds-tens"></div>
-                    <div class="digit-container" id="seconds-ones"></div>
                 </div>
             </div>
             <div class="hidden md:flex space-x-2">
@@ -692,7 +729,8 @@
     };
 
     function initDigitContainers() {
-        ['hours-tens','hours-ones','minutes-tens','minutes-ones','seconds-tens','seconds-ones'].forEach(id => {
+        ['year-thousands','year-hundreds','year-tens','year-ones','month-tens','month-ones','day-tens','day-ones',
+         'hours-tens','hours-ones','minutes-tens','minutes-ones','seconds-tens','seconds-ones'].forEach(id => {
             const container = document.getElementById(id);
             if (!container) return;
             for (let row = 0; row < 7; row++) {
@@ -722,26 +760,40 @@
 
     function updateClock() {
         const now = new Date();
-        // 使用 toLocaleString 可靠获取北京时间（UTC+8）
-        const beijingTimeStr = now.toLocaleString('zh-CN', {
+
+        // 日期：YYYY-MM-DD
+        const dateStr = now.toLocaleString('zh-CN', {
+            timeZone: 'Asia/Shanghai',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+        const dMatch = dateStr.match(/(\d{4})[^\d](\d{2})[^\d](\d{2})/);
+        if (dMatch) {
+            updateDigit('year-thousands', parseInt(dMatch[1][0]));
+            updateDigit('year-hundreds', parseInt(dMatch[1][1]));
+            updateDigit('year-tens', parseInt(dMatch[1][2]));
+            updateDigit('year-ones', parseInt(dMatch[1][3]));
+            updateDigit('month-tens', parseInt(dMatch[2][0]));
+            updateDigit('month-ones', parseInt(dMatch[2][1]));
+            updateDigit('day-tens', parseInt(dMatch[3][0]));
+            updateDigit('day-ones', parseInt(dMatch[3][1]));
+        }
+
+        // 时间：HH:MM:SS
+        const timeStr = now.toLocaleString('zh-CN', {
             timeZone: 'Asia/Shanghai',
             hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
-        // 从字符串中提取 HH:MM:SS
-        const match = beijingTimeStr.match(/(\d{1,2}):(\d{2}):(\d{2})/);
-        if (!match) return;
-        const h = match[1].padStart(2, '0');
-        const m = match[2];
-        const s = match[3];
-        updateDigit('hours-tens', parseInt(h[0]));
-        updateDigit('hours-ones', parseInt(h[1]));
-        updateDigit('minutes-tens', parseInt(m[0]));
-        updateDigit('minutes-ones', parseInt(m[1]));
-        updateDigit('seconds-tens', parseInt(s[0]));
-        updateDigit('seconds-ones', parseInt(s[1]));
+        const tMatch = timeStr.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+        if (tMatch) {
+            const h = tMatch[1].padStart(2, '0');
+            updateDigit('hours-tens', parseInt(h[0]));
+            updateDigit('hours-ones', parseInt(h[1]));
+            updateDigit('minutes-tens', parseInt(tMatch[2][0]));
+            updateDigit('minutes-ones', parseInt(tMatch[2][1]));
+            updateDigit('seconds-tens', parseInt(tMatch[3][0]));
+            updateDigit('seconds-ones', parseInt(tMatch[3][1]));
+        }
     }
 
     // 初始化
