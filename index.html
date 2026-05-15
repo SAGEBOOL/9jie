@@ -50,13 +50,75 @@
             0%, to { background-position: 0% center; }
             50% { background-position: 200% center; }
         }
+
+        /* 像素时钟样式 */
+        .digit-container {
+            display: grid;
+            grid-template-columns: repeat(4, 0.2rem);
+            grid-template-rows: repeat(7, 0.2rem);
+            gap: 0.05rem;
+        }
+
+        .pixel {
+            background-color: rgba(100, 255, 218, 0.15);
+            border-radius: 0.5px;
+        }
+
+        .pixel.active {
+            background-color: #64ffda;
+            box-shadow: 0 0 4px rgba(100, 255, 218, 0.5);
+        }
+
+        .colon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.25rem;
+            margin: 0 0.1rem;
+        }
+
+        .colon-dot {
+            width: 0.15rem;
+            height: 0.15rem;
+            background-color: #64ffda;
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(100, 255, 218, 0.5);
+        }
+
+        /* 移动端隐藏秒数和第二个冒号 */
+        @media (max-width: 768px) {
+            #seconds-tens,
+            #seconds-ones,
+            #colon-ms {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="text-gray-200">
     <!-- 导航栏 -->
     <nav class="fixed top-0 w-full z-50" style="background: rgba(26, 26, 46, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-title-gradient">九界修真</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-title-gradient whitespace-nowrap">九界修真</h1>
+                <!-- 像素时钟 -->
+                <div id="pixel-clock" class="flex items-center" style="gap: 2px;">
+                    <div class="digit-container" id="hours-tens"></div>
+                    <div class="digit-container" id="hours-ones"></div>
+                    <div class="colon" id="colon-hm">
+                        <div class="colon-dot"></div>
+                        <div class="colon-dot"></div>
+                    </div>
+                    <div class="digit-container" id="minutes-tens"></div>
+                    <div class="digit-container" id="minutes-ones"></div>
+                    <div class="colon" id="colon-ms">
+                        <div class="colon-dot"></div>
+                        <div class="colon-dot"></div>
+                    </div>
+                    <div class="digit-container" id="seconds-tens"></div>
+                    <div class="digit-container" id="seconds-ones"></div>
+                </div>
+            </div>
             <div class="hidden md:flex space-x-2">
                 <button onclick="scrollToSection('overview')" class="nav-btn px-3 py-1 rounded-full text-sm">总览</button>
                 <button onclick="scrollToSection('realms')" class="nav-btn px-3 py-1 rounded-full text-sm">九界</button>
@@ -612,6 +674,70 @@
             });
             renderCharacters();
         }
+    </script>
+
+    <script>
+    // 像素时钟逻辑
+    const digitPatterns = {
+        0: [[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]],
+        1: [[0,0,1,0],[0,1,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,1]],
+        2: [[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1],[1,0,0,0],[1,0,0,0],[1,1,1,1]],
+        3: [[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1]],
+        4: [[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]],
+        5: [[1,1,1,1],[1,0,0,0],[1,0,0,0],[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1]],
+        6: [[1,1,1,1],[1,0,0,0],[1,0,0,0],[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]],
+        7: [[1,1,1,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]],
+        8: [[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]],
+        9: [[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1]]
+    };
+
+    function initDigitContainers() {
+        ['hours-tens','hours-ones','minutes-tens','minutes-ones','seconds-tens','seconds-ones'].forEach(id => {
+            const container = document.getElementById(id);
+            if (!container) return;
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const pixel = document.createElement('div');
+                    pixel.className = 'pixel';
+                    container.appendChild(pixel);
+                }
+            }
+        });
+        updateClock();
+    }
+
+    function updateDigit(containerId, digit) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const pattern = digitPatterns[digit];
+        const pixels = container.children;
+        let idx = 0;
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < 4; col++) {
+                pixels[idx].classList.toggle('active', pattern[row][col] === 1);
+                idx++;
+            }
+        }
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const beijingTime = new Date(now.getTime() + (8 * 3600000) - (now.getTimezoneOffset() * 60000));
+        const h = beijingTime.getUTCHours().toString().padStart(2, '0');
+        const m = beijingTime.getUTCMinutes().toString().padStart(2, '0');
+        const s = beijingTime.getUTCSeconds().toString().padStart(2, '0');
+        
+        updateDigit('hours-tens', parseInt(h[0]));
+        updateDigit('hours-ones', parseInt(h[1]));
+        updateDigit('minutes-tens', parseInt(m[0]));
+        updateDigit('minutes-ones', parseInt(m[1]));
+        updateDigit('seconds-tens', parseInt(s[0]));
+        updateDigit('seconds-ones', parseInt(s[1]));
+    }
+
+    // 初始化
+    initDigitContainers();
+    setInterval(updateClock, 1000);
     </script>
 </body>
 </html>
