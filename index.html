@@ -47,34 +47,8 @@
         }
         
         @keyframes gradient {
-            0%, 100% { background-position: 0% center; }
+            0%, to { background-position: 0% center; }
             50% { background-position: 200% center; }
-        }
-        
-        /* 用户投稿模态框样式 */
-        .hidden {
-            display: none !important;
-        }
-        
-        #submission-modal {
-            animation: fadeInModal 0.3s ease;
-        }
-        
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        #submission-modal form input,
-        #submission-modal form textarea {
-            transition: all 0.3s ease;
-        }
-        
-        #submission-modal form input:focus,
-        #submission-modal form textarea:focus {
-            outline: none;
-            border-color: #eab308 !important;
-            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2);
         }
     </style>
 </head>
@@ -89,7 +63,6 @@
                 <button onclick="scrollToSection('characters')" class="nav-btn px-3 py-1 rounded-full text-sm">人物</button>
                 <button onclick="scrollToSection('systems')" class="nav-btn px-3 py-1 rounded-full text-sm">体系</button>
                 <button onclick="scrollToSection('story')" class="nav-btn px-3 py-1 rounded-full text-sm">故事</button>
-                <button onclick="openSubmissionModal()" class="nav-btn px-3 py-1 rounded-full text-sm" style="background: rgba(234, 179, 8, 0.15); color: #eab308;">✨ 用户投稿</button>
             </div>
         </div>
     </nav>
@@ -108,9 +81,6 @@
             </button>
             <button onclick="scrollToSection('story')" class="flex flex-col items-center text-xs" style="color: #8892b0;">
                 <span class="text-lg">📖</span>故事
-            </button>
-            <button onclick="openSubmissionModal()" class="flex flex-col items-center text-xs" style="color: #eab308;">
-                <span class="text-lg">✏️</span>投稿
             </button>
         </div>
     </div>
@@ -669,124 +639,6 @@
             });
             renderCharacters();
         }
-
-        // 用户投稿功能
-        function openSubmissionModal() {
-            document.getElementById('submission-modal').classList.remove('hidden');
-        }
-
-        function closeSubmissionModal() {
-            document.getElementById('submission-modal').classList.add('hidden');
-        }
-
-        function submitToGitHub() {
-            const name = document.getElementById('sub-char-name').value.trim();
-            const emoji = document.getElementById('sub-char-emoji').value.trim() || '👤';
-            const identity = document.getElementById('sub-char-identity').value.trim();
-            const personality = document.getElementById('sub-char-personality').value.trim();
-            const relations = document.getElementById('sub-char-relations').value.trim();
-            const storyPage = document.getElementById('sub-char-story').value.trim();
-            const imageUrl = document.getElementById('sub-char-image').value.trim();
-
-            if (!name || !identity) {
-                alert('请至少填写角色名称和身份！');
-                return;
-            }
-
-            // 构建 Issue 内容
-            const title = `【用户投稿】新角色：${name}`;
-            const body = `
-## 用户投稿：新角色
-
-**角色名称**： ${name}
-**Emoji**： ${emoji}
-**身份**： ${identity}
-**性格**： ${personality}
-**关系**： ${relations}
-**故事页面**： ${storyPage}
-**图片链接**： ${imageUrl}
-
----
-
-请管理员审核后添加到百科。
-            `.trim();
-
-            // 构建 GitHub Issue URL
-            const url = 'https://github.com/SAGEBOOL/9jie/issues/new' +
-                '?title=' + encodeURIComponent(title) +
-                '&body=' + encodeURIComponent(body) +
-                '&labels=user-submission';
-
-            // 打开 GitHub Issue 页面
-            window.open(url, '_blank');
-            
-            // 关闭模态框
-            closeSubmissionModal();
-            
-            // 清空表单
-            document.getElementById('submission-form').reset();
-        }
     </script>
-    <div id="submission-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);">
-        <div class="bg-gray-900 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto" style="border: 1px solid rgba(255,255,255,0.1);">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" style="color: #eab308;">✨ 用户投稿</h2>
-                <button onclick="closeSubmissionModal()" class="text-3xl" style="color: #8892b0;">×</button>
-            </div>
-
-            <form id="submission-form" onsubmit="event.preventDefault(); submitToGitHub();" class="space-y-4">
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">角色名称 *</label>
-                    <input type="text" id="sub-char-name" required class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">Emoji（可选）</label>
-                    <input type="text" id="sub-char-emoji" placeholder="例如：👤 🧙 👥" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">身份 *</label>
-                    <input type="text" id="sub-char-identity" required placeholder="例如：九界之主 · 黑暗势力统治者" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">性格（可选）</label>
-                    <input type="text" id="sub-char-personality" placeholder="例如：冷酷无情、野心勃勃" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">关系（可选）</label>
-                    <textarea id="sub-char-relations" rows="3" placeholder="例如：刘浪浪(兄弟)、河一(盟友)" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;"></textarea>
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">故事页面路径（可选）</label>
-                    <input type="text" id="sub-char-story" placeholder="例如：xuan-chen.html" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                </div>
-
-                <div>
-                    <label class="block mb-2" style="color: #ccd6f6;">图片链接（可选）</label>
-                    <input type="text" id="sub-char-image" placeholder="例如：https://example.com/image.png" class="w-full px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
-                    <p class="text-xs mt-1" style="color: #6b7280;">提示：请先将图片上传到图床（如 Imgur），然后粘贴链接</p>
-                </div>
-
-                <div class="flex gap-4 mt-6">
-                    <button type="button" onclick="closeSubmissionModal()" class="flex-1 px-6 py-3 rounded-full" style="background: rgba(255,255,255,0.1); color: #8892b0;">取消</button>
-                    <button type="submit" class="flex-1 px-6 py-3 rounded-full font-bold text-white" style="background: linear-gradient(135deg, #eab308, #ca8a04);">提交到 GitHub</button>
-                </div>
-            </form>
-
-            <div class="mt-6 p-4 rounded-lg" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2);">
-                <p class="text-sm" style="color: #eab308;">📌 投稿说明：</p>
-                <ul class="text-xs mt-2 space-y-1" style="color: #fef08a;">
-                    <li>• 提交后会打开 GitHub Issue 页面</li>
-                    <li>• 需要 GitHub 账号才能提交</li>
-                    <li>• 管理员审核通过后会添加到百科</li>
-                    <li>• 图片请先上传到图床（如 Imgur、SM.MS）</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
