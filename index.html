@@ -473,8 +473,7 @@
     <script>
         // 音乐播放器功能
         let musicPlayer = null;
-        let isPlaying = true;  // 默认播放状态
-        let autoplayBlocked = false;
+        let isPlaying = false;  // 默认不自动播放
         let progressTimer = null;
         const circumference = 2 * Math.PI * 146;
 
@@ -511,21 +510,7 @@
                 musicPlayer.play().catch(() => {});
             });
 
-            // 尝试自动播放
-            musicPlayer.play().then(() => {
-                isPlaying = true;
-                updatePlayButton();
-                startProgressRing();
-                const tip = document.getElementById('autoplay-tip');
-                if (tip) tip.style.display = 'none';
-            }).catch(err => {
-                console.log('自动播放被阻止:', err);
-                autoplayBlocked = true;
-                isPlaying = false;
-                updatePlayButton();
-                const tip = document.getElementById('autoplay-tip');
-                if (tip) tip.style.display = 'block';
-            });
+            updatePlayButton();
         }
 
         function toggleMusicPanel() {
@@ -600,28 +585,9 @@
             document.getElementById('progressCircle').style.strokeDasharray = `${circumference - offset} ${circumference}`;
         }
         
-        // 用户点击页面时，如果自动播放被阻止，尝试播放
-        function enableAutoplay() {
-            if (autoplayBlocked && musicPlayer) {
-                musicPlayer.play().then(() => {
-                    isPlaying = true;
-                    updatePlayButton();
-                    startProgressRing();
-                    const tip = document.getElementById('autoplay-tip');
-                    if (tip) tip.style.display = 'none';
-                    autoplayBlocked = false;
-                }).catch(err => {
-                    console.log('仍需用户交互');
-                });
-            }
-        }
-
-        // 页面加载时初始化
+        // 页面加载时初始化音乐（不自动播放）
         window.addEventListener('load', () => {
             initMusic();
-            // 监听用户点击，尝试启用自动播放
-            document.addEventListener('click', enableAutoplay, { once: false });
-            document.addEventListener('touchstart', enableAutoplay, { once: false });
         });
     </script>
 
