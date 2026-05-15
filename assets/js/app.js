@@ -554,7 +554,7 @@ function renderRealmHierarchy() {
             <h3 class="text-xl font-bold text-center mb-4" style="color: #64ffda;">九界立体层级结构</h3>
             <p class="text-center mb-6" style="color: #8892b0; font-size: 14px;">点击任意界域查看详情，连线表示界门连通方向</p>
             <div class="flex justify-center">
-                <svg id="realm-hierarchy-svg" viewBox="0 0 800 600" class="w-full max-w-4xl" style="max-height: 500px; background: rgba(255,255,255,0.03); border-radius: 16px;"></svg>
+                <svg id="realm-hierarchy-svg" viewBox="0 0 800 600" class="w-full max-w-4xl" style="max-height: 500px; background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 32px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.25);"></svg>
             </div>`;
         realmsSection.insertBefore(wrapper, realmsContainer);
         return renderRealmHierarchy();
@@ -596,7 +596,7 @@ function renderRealmHierarchy() {
         const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         glow.setAttribute('cx', node.x);
         glow.setAttribute('cy', node.y);
-        glow.setAttribute('r', '28');
+        glow.setAttribute('r', '38');
         glow.setAttribute('fill', node.color);
         glow.setAttribute('opacity', '0.2');
         svg.appendChild(glow);
@@ -604,14 +604,14 @@ function renderRealmHierarchy() {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', node.x);
         circle.setAttribute('cy', node.y);
-        circle.setAttribute('r', '22');
+        circle.setAttribute('r', '30');
         circle.setAttribute('fill', node.color);
         circle.setAttribute('stroke', '#fff');
         circle.setAttribute('stroke-width', '2');
         circle.style.cursor = 'pointer';
         circle.addEventListener('click', () => showRealmFromHierarchy(node.id));
-        circle.addEventListener('mouseenter', function() { this.setAttribute('r', '26'); });
-        circle.addEventListener('mouseleave', function() { this.setAttribute('r', '22'); });
+        circle.addEventListener('mouseenter', function() { this.setAttribute('r', '35'); });
+        circle.addEventListener('mouseleave', function() { this.setAttribute('r', '30'); });
         svg.appendChild(circle);
 
         const iconText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
