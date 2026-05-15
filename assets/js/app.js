@@ -56,7 +56,8 @@ const charactersData = [
             { id: 'liulanglang', name: '刘浪浪', type: 'brother' },
             { id: 'zhangleisheng', name: '张雷生', type: 'brother' },
             { id: 'gandafu', name: '甘道夫', type: 'brother' },
-            { id: 'linqing', name: '林清', type: 'lover' }
+            { id: 'linqing', name: '林清', type: 'lover' },
+            { id: 'bayan', name: '巴彦巨龙', type: 'ally' }
         ],
         stories: ['第11卷：修真初触', '第18卷：道心考验']
     },
@@ -226,6 +227,24 @@ const charactersData = [
             { id: 'liulanglang', name: '刘浪浪', type: 'enemy' }
         ],
         stories: ['第19卷：黑暗觉醒', '第30卷：终极对决']
+    },
+    {
+        id: 'bayan',
+        name: '巴彦巨龙',
+        emoji: '🐉',
+        avatar: 'assets/images/characters/bayan.png',
+        camp: 'special',
+        campName: '守护兽',
+        identity: '墟界原生守护兽 · 河一坐骑',
+        personality: '忠诚高傲、记忆碎片化、万年前即已存在',
+        abilities: ['龙炎吐息（天火级）', '龙鳞护体（物理免疫70%）', '空间穿梭（百里瞬移）', '灵能感知（方圆千里）'],
+        arc: '从万年沉睡中苏醒，认河一为主，守护九界',
+        systems: ['能源体系', '功法体系'],
+        relations: [
+            { id: 'heyi', name: '河一', type: 'master' },
+            { id: 'linqing', name: '林清', type: 'ally' }
+        ],
+        stories: ['第2卷：墟界深处苏醒', '后续：与河一共战九界']
     }
 ];
 
