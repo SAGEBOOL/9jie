@@ -467,47 +467,231 @@
 
         <!-- 播客有声书板块 -->
         <section class="story-content fade-in" style="margin-top: 30px;">
-            <h2 class="chapter-title" style="font-size: 24px;">🎙️ 有声书</h2>
+            <h2 class="chapter-title" style="font-size: 24px;">🎧 有声书</h2>
             
-            <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">云希（男声）朗读版，可在线收听或下载</p>
+            <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">云希（男声）朗读版 · 点击曲目即可播放</p>
             
             <!-- 播放器容器 -->
-            <div class="space-y-6">
-                <!-- 开篇 -->
-                <div class="p-6 rounded-2xl" style="background: rgba(100, 255, 218, 0.08); border: 1px solid rgba(100, 255, 218, 0.2);">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 style="color: #64ffda; font-weight: bold; font-size: 18px;">《九界归尘》开篇</h3>
-                            <p style="color: #8892b0; font-size: 14px; margin-top: 4px;">约 1300 字 | 朗读：云希（男声）</p>
-                        </div>
-                        <span style="font-size: 40px;">🎧</span>
+            <div id="podcast-player" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 32px; padding: 32px;">
+                
+                <!-- 当前播放信息 -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0;">
+                        🎙️
                     </div>
-                    <audio controls class="w-full" style="filter: hue-rotate(140deg);">
-                        <source src="assets/music/he-yi-opening.mp3" type="audio/mpeg">
-                        您的浏览器不支持 audio 标签。
-                    </audio>
+                    <div class="flex-1">
+                        <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
+                        <p id="podcast-desc" style="color: #8892b0; font-size: 13px;">云希（男声）朗读</p>
+                    </div>
                 </div>
                 
-                <!-- 第二章 -->
-                <div class="p-6 rounded-2xl" style="background: rgba(243, 156, 18, 0.08); border: 1px solid rgba(243, 156, 18, 0.2);">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 style="color: #f39c12; font-weight: bold; font-size: 18px;">《九界归尘》第二章：墟界残响</h3>
-                            <p style="color: #8892b0; font-size: 14px; margin-top: 4px;">约 1800 字 | 朗读：云希（男声）</p>
+                <!-- 进度条 -->
+                <div class="mb-4">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span id="podcast-current-time" style="color: #6b7280; font-size: 12px; min-width: 40px;">0:00</span>
+                        <div style="flex: 1; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; cursor: pointer;" id="podcast-progress-bar" onclick="seekPodcast(event)">
+                            <div id="podcast-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #64ffda, #a78bfa); border-radius: 2px; transition: width 0.1s linear;"></div>
                         </div>
-                        <span style="font-size: 40px;">🎧</span>
+                        <span id="podcast-duration" style="color: #6b7280; font-size: 12px; min-width: 40px;">0:00</span>
                     </div>
-                    <audio controls class="w-full" style="filter: hue-rotate(40deg);">
-                        <source src="assets/music/he-yi-chapter-02.mp3" type="audio/mpeg">
-                        您的浏览器不支持 audio 标签。
-                    </audio>
+                </div>
+                
+                <!-- 控制按钮 -->
+                <div class="flex items-center justify-center gap-4 mb-6">
+                    <button onclick="prevPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏮</button>
+                    <button id="podcast-play-btn" onclick="togglePodcast()" style="background: linear-gradient(135deg, #64ffda, #a78bfa); border: none; color: #1a1a2e; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(100, 255, 218, 0.3);">▶️</button>
+                    <button onclick="nextPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏭</button>
+                </div>
+                
+                <!-- 播放列表 -->
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+                    <h4 style="color: #8892b0; font-size: 14px; margin-bottom: 12px;">播放列表</h4>
+                    <div class="space-y-2" id="podcast-playlist">
+                        <!-- 曲目1 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(100, 255, 218, 0.08); border: 1px solid rgba(100, 255, 218, 0.2);"
+                             data-index="0"
+                             onclick="playPodcast(0)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #64ffda; font-size: 14px; font-weight: bold;">《九界归尘》开篇</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">约 1300 字 | 云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 曲目2 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="1"
+                             onclick="playPodcast(1)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第二章：墟界残响</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">约 1800 字 | 云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 曲目3 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="2"
+                             onclick="playPodcast(2)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">🎧</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">第四章：散修的规矩</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <p style="color: #6b7280; font-size: 13px;">💡 提示：点击播放按钮即可收听，支持后台播放</p>
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量5%）</p>
             </div>
         </section>
+
+        <script>
+        // 播客播放器逻辑
+        const podcastList = [
+            { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', desc: '约 1300 字 | 云希（男声）', icon: '📖' },
+            { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', desc: '约 1800 字 | 云希（男声）', icon: '📖' },
+            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', desc: '云希（男声）', icon: '🎧' }
+        ];
+        
+        let currentPodcastIndex = -1;
+        let isPodcastPlaying = false;
+        let podcastAudio = null;
+        let bgMusic = null;
+        
+        function initBgMusic() {
+            if (!bgMusic) {
+                bgMusic = new Audio('assets/music/月下孤城 (1).mp3');
+                bgMusic.volume = 0.05;  // 固定5%音量
+                bgMusic.loop = true;
+            }
+        }
+        
+        function playPodcast(index) {
+            if (index < 0 || index >= podcastList.length) return;
+            
+            // 停止当前播放
+            if (podcastAudio) {
+                podcastAudio.pause();
+                podcastAudio.currentTime = 0;
+            }
+            
+            // 播放新曲目
+            currentPodcastIndex = index;
+            const track = podcastList[index];
+            podcastAudio = new Audio(track.file);
+            
+            // 更新UI
+            document.getElementById('podcast-title').textContent = track.name;
+            document.getElementById('podcast-desc').textContent = track.desc;
+            
+            // 更新播放列表高亮
+            document.querySelectorAll('.podcast-track').forEach((el, i) => {
+                if (i === index) {
+                    el.style.background = 'rgba(100, 255, 218, 0.08)';
+                    el.style.borderColor = 'rgba(100, 255, 218, 0.2)';
+                    el.querySelector('.track-name').style.color = '#64ffda';
+                } else {
+                    el.style.background = 'rgba(255, 255, 255, 0.03)';
+                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    el.querySelector('.track-name').style.color = '#e0e0e0';
+                }
+            });
+            
+            // 播放
+            podcastAudio.play();
+            isPodcastPlaying = true;
+            document.getElementById('podcast-play-btn').textContent = '⏸️';
+            
+            // 自动播放背景音乐（5%音量）
+            initBgMusic();
+            bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+            
+            // 更新进度条
+            podcastAudio.addEventListener('timeupdate', updatePodcastProgress);
+            podcastAudio.addEventListener('loadedmetadata', () => {
+                document.getElementById('podcast-duration').textContent = formatTime(podcastAudio.duration);
+            });
+            podcastAudio.addEventListener('ended', () => {
+                // 自动播放下一首
+                if (currentPodcastIndex < podcastList.length - 1) {
+                    playPodcast(currentPodcastIndex + 1);
+                } else {
+                    // 播放列表结束
+                    isPodcastPlaying = false;
+                    document.getElementById('podcast-play-btn').textContent = '▶️';
+                    if (bgMusic) bgMusic.pause();
+                }
+            });
+        }
+        
+        function togglePodcast() {
+            if (currentPodcastIndex === -1) {
+                // 没有选中曲目，播放第一首
+                playPodcast(0);
+                return;
+            }
+            
+            if (isPodcastPlaying) {
+                podcastAudio.pause();
+                isPodcastPlaying = false;
+                document.getElementById('podcast-play-btn').textContent = '▶️';
+                if (bgMusic) bgMusic.pause();
+            } else {
+                podcastAudio.play();
+                isPodcastPlaying = true;
+                document.getElementById('podcast-play-btn').textContent = '⏸️';
+                if (bgMusic) bgMusic.play().catch(e => {});
+            }
+        }
+        
+        function prevPodcast() {
+            if (currentPodcastIndex > 0) {
+                playPodcast(currentPodcastIndex - 1);
+            }
+        }
+        
+        function nextPodcast() {
+            if (currentPodcastIndex < podcastList.length - 1) {
+                playPodcast(currentPodcastIndex + 1);
+            }
+        }
+        
+        function updatePodcastProgress() {
+            if (!podcastAudio) return;
+            const progress = (podcastAudio.currentTime / podcastAudio.duration) * 100;
+            document.getElementById('podcast-progress').style.width = progress + '%';
+            document.getElementById('podcast-current-time').textContent = formatTime(podcastAudio.currentTime);
+        }
+        
+        function seekPodcast(event) {
+            if (!podcastAudio) return;
+            const bar = document.getElementById('podcast-progress-bar');
+            const rect = bar.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            podcastAudio.currentTime = percent * podcastAudio.duration;
+        }
+        
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return min + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+        </script>
 
         <!-- 相关剧情板块 -->
         <section class="story-content fade-in" style="margin-top: 30px;">
