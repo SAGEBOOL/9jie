@@ -722,11 +722,20 @@
 
     function updateClock() {
         const now = new Date();
-        const beijingTime = new Date(now.getTime() + (8 * 3600000) - (now.getTimezoneOffset() * 60000));
-        const h = beijingTime.getUTCHours().toString().padStart(2, '0');
-        const m = beijingTime.getUTCMinutes().toString().padStart(2, '0');
-        const s = beijingTime.getUTCSeconds().toString().padStart(2, '0');
-        
+        // 使用 toLocaleString 可靠获取北京时间（UTC+8）
+        const beijingTimeStr = now.toLocaleString('zh-CN', {
+            timeZone: 'Asia/Shanghai',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        // 从字符串中提取 HH:MM:SS
+        const match = beijingTimeStr.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+        if (!match) return;
+        const h = match[1].padStart(2, '0');
+        const m = match[2];
+        const s = match[3];
         updateDigit('hours-tens', parseInt(h[0]));
         updateDigit('hours-ones', parseInt(h[1]));
         updateDigit('minutes-tens', parseInt(m[0]));
