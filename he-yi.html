@@ -476,13 +476,34 @@
                 
                 <!-- 当前播放信息 -->
                 <div class="flex items-center gap-4 mb-6">
-                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0;">
-                        🎙️
+                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden;">
+                        <img src="assets/images/podcast-cover.png" alt="播客封面" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
                     </div>
                     <div class="flex-1">
                         <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
                         <p id="podcast-desc" style="color: #8892b0; font-size: 13px;">云希（男声）朗读</p>
                     </div>
+                    <button onclick="toggleSharePanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="分享">🔗</button>
+                </div>
+                
+                <!-- 分享面板 -->
+                <div id="share-panel" style="display: none; background: rgba(26, 26, 46, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 16px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="color: #e0e0e0; font-size: 14px; font-weight: bold;">分享播客</h4>
+                        <button onclick="toggleSharePanel()" style="background: none; border: none; color: #8892b0; cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button onclick="copyPodcastLink()" style="flex: 1; min-width: 120px; background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>📋</span> 复制链接
+                        </button>
+                        <button onclick="shareToWeChat()" style="flex: 1; min-width: 120px; background: rgba(7, 193, 96, 0.1); border: 1px solid rgba(7, 193, 96, 0.3); color: #07c160; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>💬</span> 微信
+                        </button>
+                        <button onclick="shareToWeibo()" style="flex: 1; min-width: 120px; background: rgba(230, 22, 45, 0.1); border: 1px solid rgba(230, 22, 45, 0.3); color: #e6162d; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>📢</span> 微博
+                        </button>
+                    </div>
+                    <div id="share-feedback" style="display: none; margin-top: 12px; text-align: center; color: #64ffda; font-size: 13px; padding: 8px; background: rgba(100, 255, 218, 0.05); border-radius: 8px;"></div>
                 </div>
                 
                 <!-- 进度条 -->
@@ -722,6 +743,79 @@
             const min = Math.floor(seconds / 60);
             const sec = Math.floor(seconds % 60);
             return min + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+        
+        // 分享功能
+        function toggleSharePanel() {
+            const panel = document.getElementById('share-panel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                document.getElementById('share-feedback').style.display = 'none';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        function getPodcastShareText() {
+            const trackName = currentPodcastIndex >= 0 ? podcastList[currentPodcastIndex].name : '河一有声书';
+            return '正在收听「九界修真」' + trackName + ' — 云希（男声）朗读版';
+        }
+        
+        function getPodcastShareUrl() {
+            return window.location.href;
+        }
+        
+        function copyPodcastLink() {
+            const shareText = getPodcastShareText() + '\n' + getPodcastShareUrl();
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showShareFeedback('✅ 已复制到剪贴板！');
+                }).catch(() => {
+                    fallbackCopy(shareText);
+                });
+            } else {
+                fallbackCopy(shareText);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showShareFeedback('✅ 已复制到剪贴板！');
+            } catch (err) {
+                showShareFeedback('❌ 复制失败，请手动复制链接');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        function showShareFeedback(message) {
+            const feedback = document.getElementById('share-feedback');
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 3000);
+        }
+        
+        function shareToWeChat() {
+            const trackName = currentPodcastIndex >= 0 ? podcastList[currentPodcastIndex].name : '河一有声书';
+            showShareFeedback('💡 请使用浏览器「分享到微信」功能，或复制链接发送给朋友');
+        }
+        
+        function shareToWeibo() {
+            const text = getPodcastShareText();
+            const url = getPodcastShareUrl();
+            const weiboUrl = 'https://service.weibo.com/share/share.php?title=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
+            window.open(weiboUrl, '_blank', 'width=600,height=400');
         }
         </script>
 
