@@ -482,8 +482,8 @@
                 
                 <!-- 当前播放信息 -->
                 <div class="flex items-center gap-4 mb-6">
-                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden; animation: vinylRotate 3s linear infinite; animation-play-state: paused;">
-                        <img src="assets/images/podcast-cover.png" alt="播客封面" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
+                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden; animation: vinylRotate 3s linear infinite; animation-play-state: paused; box-shadow: 0 0 25px rgba(100, 255, 218, 0.4), 0 0 50px rgba(167, 139, 250, 0.2); border: 3px solid rgba(255, 255, 255, 0.2);">
+                        <img src="assets/images/河一.png" alt="河一" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
                     </div>
                     <div class="flex-1">
                         <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
@@ -608,6 +608,51 @@
                                 <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
                             </div>
                         </div>
+                        
+                        <!-- 曲目6 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="5"
+                             onclick="playPodcast(5)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第七章：始源追杀</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 曲目7 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="6"
+                             onclick="playPodcast(6)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第八章：重回灵溪</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 曲目8 -->
+                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
+                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
+                             data-index="7"
+                             onclick="playPodcast(7)">
+                            <div class="flex items-center gap-3">
+                                <span class="track-icon" style="font-size: 24px;">📖</span>
+                                <div class="flex-1">
+                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第九章：月妖娆</p>
+                                    <p class="track-info" style="color: #6b7280; font-size: 12px;">云希（男声）</p>
+                                </div>
+                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -624,7 +669,10 @@
             { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', desc: '约 1800 字 | 云希（男声）', icon: '📖' },
             { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', desc: '云希（男声）', icon: '🎧' },
             { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', desc: '云希（男声）', icon: '📖' },
-            { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', desc: '云希（男声）', icon: '📖' }
+            { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', desc: '云希（男声）', icon: '📖' },
+            { name: '《九界归尘》第七章：始源追杀', file: 'assets/music/第七章-始源追杀.mp3', desc: '云希（男声）', icon: '📖' },
+            { name: '《九界归尘》第八章：重回灵溪', file: 'assets/music/第八章-重回灵溪.mp3', desc: '云希（男声）', icon: '📖' },
+            { name: '《九界归尘》第九章：月妖娆', file: 'assets/music/第九章-月妖娆.mp3', desc: '云希（男声）', icon: '📖' }
         ];
         
         let currentPodcastIndex = -1;
