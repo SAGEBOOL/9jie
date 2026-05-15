@@ -722,7 +722,7 @@ function renderCharacters() {
     
     container.innerHTML = filtered.map(char => `
         <div class="character-card" 
-             onclick="if('${char.storyPage}') window.location.href='${char.storyPage}'; else showCharacterDetail('${char.id}')"
+             onclick="${char.storyPage ? `window.location.href='${char.storyPage}'` : `showCharacterDetail('${char.id}')`}"
              style="cursor: pointer;">
         <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, ${getCampColor(char.camp)});">
             ${char.avatar 
