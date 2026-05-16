@@ -155,9 +155,9 @@
                 height: 80px;
             }
         }
-        /* 留言区域高度：默认显示5条留言 */
+        /* 留言区域：固定高度显示5条，溢出隐藏 */
         #comment-scroll-container {
-            height: 180px;
+            height: 220px;
             overflow: hidden;
             position: relative;
             margin-bottom: 20px;
@@ -165,25 +165,27 @@
             border-radius: 12px;
             padding: 12px;
         }
-            padding: 8px 44px 8px 12px;
+
+        .comment-item {
+            padding: 8px 12px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #ccd6f6;
             font-size: 13px;
             line-height: 1.5;
-            position: relative;
             font-family: "FangSong", "STFangsong", "仿宋", serif;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        
+
         .comment-like {
-            position: absolute;
-            right: 8px;
-            top: 8px;
+            align-self: flex-end;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 14px.
+            font-size: 14px;
             transition: transform 0.2s;
             color: #fff;
             padding: 0;
@@ -195,17 +197,18 @@
         .comment-like.liked {
             color: #fff;
         }
-        
+
         .comment-item .comment-author {
             color: #64ffda;
             font-size: 11px;
-            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        
+
         .comment-item .comment-time {
             color: #6b7280;
             font-size: 10px;
-            float: right;
         }
     </style>
 </head>
@@ -847,7 +850,7 @@
             
             <!-- 滚动留言展示区 -->
             <div id="comment-scroll-container" style="height: 180px; overflow: hidden; position: relative; margin-bottom: 20px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 12px;">
-                <div id="comment-scroll-content" style="display: flex; flex-direction: column; gap: 10px; animation: commentScroll 30s linear infinite;">
+                <div id="comment-scroll-content" style="display: flex; flex-direction: column; gap: 8px;">
                     <!-- 预置留言将通过JS动态生成 -->
                 </div>
             </div>
@@ -1426,12 +1429,13 @@
         });
         localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
         
-        // 渲染留言列表（顺序滚动模式）
+        // 渲染留言列表（由下向上自然滚动）
         let commentScrollTimer = null;
-        let currentCommentIndex = 0;
+        let commentScrollIndex = 0;
         function renderComments() {
+            const viewport = document.getElementById('comment-scroll-container');
             const container = document.getElementById('comment-scroll-content');
-            if (!container) return;
+            if (!viewport || !container) return;
 
             // 合并预置留言和用户留言，附加唯一key
             const allComments = [
@@ -1443,9 +1447,6 @@
 
             // 清空旧定时器
             if (commentScrollTimer) clearInterval(commentScrollTimer);
-
-            // 每次重新渲染时，重置为从第1条开始
-            currentCommentIndex = 0;
 
             function buildHTML(list) {
                 return list.map(c => {
@@ -1464,30 +1465,50 @@
                 }).join('');
             }
 
-            // 显示当前批次（5条）
-            function showCurrentBatch() {
-                const total = allComments.length;
-                if (total <= 5) {
-                    container.innerHTML = buildHTML(allComments);
-                    return;
-                }
-                const batch = [];
-                for (let i = 0; i < 5; i++) {
-                    batch.push(allComments[(currentCommentIndex + i) % total]);
-                }
-                container.innerHTML = buildHTML(batch);
+            // ≤5条：直接显示，不滚动
+            if (allComments.length <= 5) {
+                container.innerHTML = buildHTML(allComments);
+                container.style.transition = 'none';
+                container.style.transform = 'translateY(0)';
+                return;
             }
 
-            showCurrentBatch();
+            // >5条：构建[原始 + 复制]，实现无缝循环滚动
+            const displayList = [...allComments, ...allComments];
+            container.innerHTML = buildHTML(displayList);
+            container.style.transition = 'transform 0.5s ease-in-out';
 
-            // 仅当留言超过5条时，每3秒滚动到下一批5条（顺序循环）
-            if (allComments.length > 5) {
-                commentScrollTimer = setInterval(() => {
-                    const total = allComments.length;
-                    currentCommentIndex = (currentCommentIndex + 5) % total;
-                    showCurrentBatch();
-                }, 3000);
+            // 动态计算单条高度（含gap）
+            const firstItem = container.querySelector('.comment-item');
+            const singleHeight = firstItem ? firstItem.offsetHeight : 48;
+            const gap = 8;
+            const itemAndGap = singleHeight + gap;
+
+            // 视口固定显示5条（5条内容 + 4个gap）
+            viewport.style.height = (singleHeight * 5 + gap * 4) + 'px';
+
+            commentScrollIndex = 0;
+
+            // 滚动函数：每3秒向上滚动一条
+            function doScroll() {
+                commentScrollIndex++;
+                // 滚动完原始列表后，无缝重置到0（利用复制内容，视觉无感知）
+                if (commentScrollIndex >= allComments.length) {
+                    container.style.transition = 'none';
+                    commentScrollIndex = 0;
+                    container.style.transform = 'translateY(0)';
+                    // 强制回流，使无动画重置立即生效
+                    container.offsetHeight;
+                    container.style.transition = 'transform 0.5s ease-in-out';
+                } else {
+                    container.style.transform = `translateY(${-(commentScrollIndex * itemAndGap)}px)`;
+                }
             }
+
+            // 初始位置
+            container.style.transform = 'translateY(0)';
+
+            commentScrollTimer = setInterval(doScroll, 3000);
         }
 
         // 点赞/取消点赞
