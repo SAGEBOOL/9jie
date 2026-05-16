@@ -779,13 +779,9 @@
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量2%，可开关）</p>
-            </div>
-        </section>
         
-        <!-- 留言区 -->
-        <section id="comment-section" style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.15); border-radius: 32px;">
+        <!-- 留言区（在播放器容器内） -->
+        <div id="comment-section" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
             <h3 style="color: #e0e0e0; font-size: 18px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
                 💬 留言区
                 <span style="font-size: 12px; color: #6b7280; font-weight: normal;">（匿名留言）</span>
@@ -804,7 +800,13 @@
                 <button onclick="submitComment()" style="background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(100,255,218,0.2)'" onmouseout="this.style.background='rgba(100,255,218,0.1)'">发送</button>
             </div>
             <div id="comment-feedback" style="display: none; margin-top: 8px; color: #64ffda; font-size: 12px;"></div>
+        </div>
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量2%，可开关）</p>
+            </div>
         </section>
+        
+
         
         <script>
         // 播客播放器逻辑
