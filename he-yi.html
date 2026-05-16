@@ -166,13 +166,34 @@
         }
         
         .comment-item {
-            padding: 8px 12px;
+            padding: 8px 44px 8px 12px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #ccd6f6;
             font-size: 13px;
             line-height: 1.5;
+            position: relative;
+        }
+        
+        .comment-like {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+            color: #6b7280;
+            padding: 0;
+            line-height: 1;
+        }
+        .comment-like:hover {
+            transform: scale(1.3);
+        }
+        .comment-like.liked {
+            color: #ef4444;
         }
         
         .comment-item .comment-author {
@@ -1394,28 +1415,64 @@
         // 用户留言数组（初始为空，匿名用户可添加）
         let userComments = [];
         
+        // 留言点赞数据：{ "preset_0": { count: 3, liked: true }, "user_1715000000": { count: 1, liked: false } }
+        let commentLikeData = JSON.parse(localStorage.getItem('heyi_comment_likes') || '{}');
+        
         // 渲染留言列表（预置+用户留言，重复一份实现无缝滚动）
         function renderComments() {
             const container = document.getElementById('comment-scroll-content');
             if (!container) return;
-            
-            // 合并预置留言和用户留言
-            const allComments = [...presetComments, ...userComments];
-            
+
+            // 合并预置留言和用户留言，附加唯一key
+            const allComments = [
+                ...presetComments.map((c, i) => ({ ...c, _key: 'preset_' + i })),
+                ...userComments.map(c => ({ ...c, _key: 'user_' + c.id }))
+            ];
+
             // 为了无缝滚动，重复两次
             const displayComments = [...allComments, ...allComments];
-            
-            container.innerHTML = displayComments.map(c => `
-                <div class="comment-item">
-                    <div class="comment-author">${c.author}<span class="comment-time">${c.time}</span></div>
-                    <div>${c.text}</div>
-                </div>
-            `).join('');
-            
-            // 动态调整动画时长（每条留言显示3秒）
-            const totalItems = allComments.length;
-            const duration = totalItems * 5; // 每条留言5秒
+
+            container.innerHTML = displayComments.map(c => {
+                const ld = commentLikeData[c._key] || { count: 0, liked: false };
+                return `
+        <div class="comment-item">
+            <div class="comment-author">${c.author}<span class="comment-time">${c.time}</span></div>
+            <div>${c.text}</div>
+            <button class="comment-like ${ld.liked ? 'liked' : ''}" 
+                    data-like-key="${c._key}"
+                    onclick="toggleLike('${c._key}')">
+                ${ld.liked ? '❤️' : '🤍'}${ld.count > 0 ? ' ' + ld.count : ''}
+            </button>
+        </div>
+        `;
+            }).join('');
+
+            // 动态调整动画时长（每条留言5秒）
+            const uniqueCount = presetComments.length + userComments.length;
+            const duration = uniqueCount * 5;
             container.style.animationDuration = duration + 's';
+        }
+
+        // 点赞/取消点赞
+        function toggleLike(key) {
+            if (!commentLikeData[key]) {
+                commentLikeData[key] = { count: 0, liked: false };
+            }
+            if (commentLikeData[key].liked) {
+                commentLikeData[key].count--;
+                commentLikeData[key].liked = false;
+            } else {
+                commentLikeData[key].count++;
+                commentLikeData[key].liked = true;
+            }
+            localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
+
+            // 更新所有同名key的按钮（含滚动复制的一份）
+            document.querySelectorAll(`[data-like-key="${key}"]`).forEach(btn => {
+                const d = commentLikeData[key];
+                btn.classList.toggle('liked', d.liked);
+                btn.innerHTML = (d.liked ? '❤️' : '🤍') + (d.count > 0 ? ' ' + d.count : '');
+            });
         }
         
         // 提交匿名留言
@@ -1429,6 +1486,7 @@
             
             // 添加留言
             userComments.unshift({
+                id: Date.now(),
                 author: anonId,
                 text: text,
                 time: '刚刚'
