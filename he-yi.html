@@ -155,17 +155,16 @@
                 height: 80px;
             }
         }
-        /* 留言滚动动画 */
-        @keyframes commentScroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-50%); }
+        /* 留言区域高度：默认显示5条留言 */
+        #comment-scroll-container {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 12px;
         }
-        
-        #comment-scroll-container:hover #comment-scroll-content {
-            animation-play-state: paused;
-        }
-        
-        .comment-item {
             padding: 8px 44px 8px 12px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
@@ -1427,7 +1426,8 @@
         });
         localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
         
-        // 渲染留言列表（预置+用户留言，重复一份实现无缝滚动）
+        // 渲染留言列表（随机更换模式）
+        let commentScrollTimer = null;
         function renderComments() {
             const container = document.getElementById('comment-scroll-content');
             if (!container) return;
@@ -1438,28 +1438,44 @@
                 ...userComments.map(c => ({ ...c, _key: 'user_' + c.id }))
             ];
 
-            // 为了无缝滚动，重复两次
-            const displayComments = [...allComments, ...allComments];
+            if (allComments.length === 0) return;
 
-            container.innerHTML = displayComments.map(c => {
-                const ld = commentLikeData[c._key] || { count: 0, liked: false };
-                return `
+            // 清空旧定时器
+            if (commentScrollTimer) clearInterval(commentScrollTimer);
+
+            // 初始随机选5条显示
+            const shuffled = [...allComments].sort(() => Math.random() - 0.5);
+            const visible = shuffled.slice(0, Math.min(5, allComments.length));
+
+            function buildHTML(list) {
+                return list.map(c => {
+                    const ld = commentLikeData[c._key] || { count: 0, liked: false };
+                    return `
         <div class="comment-item">
             <div class="comment-author">${c.author}<span class="comment-time">${c.time}</span></div>
             <div>${c.text}</div>
-            <button class="comment-like ${ld.liked ? 'liked' : ''}" 
+            <button class="comment-like ${ld.liked ? 'liked' : ''}"
                     data-like-key="${c._key}"
                     onclick="toggleLike('${c._key}')">
-                ${ld.liked ? '💗' : '💗'}${ld.count > 0 ? ' ' + ld.count : ''}
+                💗${ld.count > 0 ? ' ' + ld.count : ''}
             </button>
         </div>
         `;
-            }).join('');
+                }).join('');
+            }
 
-            // 动态调整动画时长（每条留言5秒）
-            const uniqueCount = presetComments.length + userComments.length;
-            const duration = uniqueCount * 5;
-            container.style.animationDuration = duration + 's';
+            container.innerHTML = buildHTML(visible);
+
+            // 每3秒随机替换一条留言
+            commentScrollTimer = setInterval(() => {
+                const currentKeys = visible.map(c => c._key);
+                const candidates = allComments.filter(c => !currentKeys.includes(c._key));
+                if (candidates.length === 0) return;
+                const replaceIdx = Math.floor(Math.random() * visible.length);
+                const newItem = candidates[Math.floor(Math.random() * candidates.length)];
+                visible[replaceIdx] = newItem;
+                container.innerHTML = buildHTML(visible);
+            }, 3000);
         }
 
         // 点赞/取消点赞
