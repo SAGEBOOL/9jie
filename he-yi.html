@@ -859,11 +859,13 @@
                 podcastAudio.playbackRate = rate;
             }
         }
+
+        function prevPodcast() {
             if (currentPodcastIndex > 0) {
                 playPodcast(currentPodcastIndex - 1);
             }
         }
-        
+
         function nextPodcast() {
             if (currentPodcastIndex < podcastList.length - 1) {
                 playPodcast(currentPodcastIndex + 1);
