@@ -811,17 +811,17 @@
         <script>
         // 播客播放器逻辑
         const podcastList = [
-            { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', icon: '📖', subtitles: ['天地初开，九界分立','蛮荒少年河一，天生废脉','十六岁那年，命运之轮开始转动','一道神秘光芒，改变了他的一生','踏上修真之路，从此不再平凡'] },
-            { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', icon: '📖', subtitles: ['墟界遗址，万年沉寂','河一意外闯入禁地','墟空戒现世，空间之力流转','万年守望者苏醒','真相，远比传说更加惊人'] },
-            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', icon: '🎧', subtitles: ['散修世界，弱肉强食','没有宗门庇护，唯有靠自己','河一初识散修法则','以实力说话，用拳头讲道理','在这片天地间，规矩由强者制定'] },
-            { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', icon: '📖', subtitles: ['重返墟界，危机四伏','遗址深处，隐藏着上古秘密','河一探索未知领域','每一步，都可能是生死之间','命运的齿轮，再次转动'] },
-            { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', icon: '📖', subtitles: ['离开墟界，重返人间','河一已是脱胎换骨','归来者，带着无尽秘密','昔日废物，今日强者','一切，才刚刚开始'] },
-            { name: '《九界归尘》第七章：始源追杀', file: 'assets/music/第七章-始源追杀.mp3', icon: '📖', subtitles: ['始源之敌，如影随形','河一遭遇前所未有的危机','追杀令下，九界震动','逃亡路上，步步惊心','生死一线，绝地反击'] },
-            { name: '《九界归尘》第八章：重回灵溪', file: 'assets/music/第八章-重回灵溪.mp3', icon: '📖', subtitles: ['灵溪故地，物是人非','河一回到最初的地方','旧人犹在，心境已变','当年少年，今非昔比','初心不改，砥砺前行'] },
-            { name: '《九界归尘》第九章：月妖娆', file: 'assets/music/第九章-月妖娆.mp3', icon: '📖', subtitles: ['月妖娆，九界第一美人','风华绝代，倾国倾城','她与河一的命运交汇','是缘是劫，难以预料','一段传奇，由此展开'] },
-            { name: '《九界归尘》第十一章：暗流涌动', file: 'assets/music/第十一章：暗流涌动.mp3', icon: '📖', subtitles: ['暗流涌动，风云变幻','九界之下，危机暗藏','河一感知到不寻常的气息','一场巨大的阴谋正在酝酿','平静的表面下，暗流汹涌'] },
-            { name: '《九界归尘》第十二章：清洗', file: 'assets/music/第十二章：清洗.mp3', icon: '📖', subtitles: ['清洗开始，血雨腥风','九界格局，重新洗牌','河一被迫卷入风暴中心','昔日盟友，今成敌人','唯有强者，才能生存下去'] },
-            { name: '《九界归尘》第十三章：墟界密使', file: 'assets/music/第十三章：墟界密使.mp3', icon: '📖', subtitles: ['墟界密使，突然现身','带着上古之秘，震撼九界','河一与之相遇，命运交错','真相层层揭开，令人震惊','新的征程，由此开启'] }
+            { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-yi-opening.txt' },
+            { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-yi-chapter-02.txt' },
+            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', icon: '🎧', subtitleFile: 'assets/subtitles/第四章-散修的规矩.txt' },
+            { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第五章-墟界遗址.txt' },
+            { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第六章-归来者.txt' },
+            { name: '《九界归尘》第七章：始源追杀', file: 'assets/music/第七章-始源追杀.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第七章-始源追杀.txt' },
+            { name: '《九界归尘》第八章：重回灵溪', file: 'assets/music/第八章-重回灵溪.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第八章-重回灵溪.txt' },
+            { name: '《九界归尘》第九章：月妖娆', file: 'assets/music/第九章-月妖娆.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第九章-月妖娆.txt' },
+            { name: '《九界归尘》第十一章：暗流涌动', file: 'assets/music/第十一章：暗流涌动.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十一章-暗流涌动.txt' },
+            { name: '《九界归尘》第十二章：清洗', file: 'assets/music/第十二章：清洗.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十二章：清洗.txt' },
+            { name: '《九界归尘》第十三章：墟界密使', file: 'assets/music/第十三章：墟界密使.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十三章：墟界密使.txt' }
         ];
         
         let currentPodcastIndex = -1;
@@ -836,6 +836,21 @@
         let sleepTimerValue = 0;  // 集数或小时数
         let sleepTimerTimeout = null;  // setTimeout 引用（用于 afterDuration 模式）
         let playedEpisodesCount = 0;  // 已播放集数计数器
+        let currentSubtitles = [];  // 当前加载的字幕数组（从外部文件加载）
+        
+        // 加载外部字幕文件
+        async function loadSubtitleFile(filePath) {
+            try {
+                const response = await fetch(filePath);
+                const text = await response.text();
+                // 按行分割，过滤空行
+                currentSubtitles = text.split('\n').filter(line => line.trim() !== '');
+                console.log('✅ 字幕加载成功：' + filePath + '（' + currentSubtitles.length + ' 句）');
+            } catch (e) {
+                console.error('❌ 字幕加载失败：' + filePath, e);
+                currentSubtitles = [];
+            }
+        }
         
         // 仅播客模式：检查URL锚点，隐藏非播客内容
         function initPodcastOnlyMode() {
@@ -890,6 +905,8 @@
             currentPodcastIndex = index;
             const track = podcastList[index];
             podcastAudio = new Audio(track.file);
+            // 加载外部字幕文件
+            if (track.subtitleFile) loadSubtitleFile(track.subtitleFile);
             
             // 更新UI
             document.getElementById('podcast-title').textContent = track.name;
@@ -1192,22 +1209,21 @@
         let subtitleFadeTimeout = null;
         function updateSubtitle(currentTime) {
             if (currentPodcastIndex < 0) return;
-            const track = podcastList[currentPodcastIndex];
-            if (!track.subtitles || track.subtitles.length === 0) return;
+            if (!currentSubtitles || currentSubtitles.length === 0) return;
             const duration = podcastAudio.duration || 1;
             const index = Math.min(
-                Math.floor((currentTime / duration) * track.subtitles.length),
-                track.subtitles.length - 1
+                Math.floor((currentTime / duration) * currentSubtitles.length),
+                currentSubtitles.length - 1
             );
             const subtitleEl = document.getElementById('podcast-subtitle');
             const wrapEl = document.getElementById('podcast-subtitle-wrap');
             if (!subtitleEl || !wrapEl) return;
             wrapEl.style.display = 'block';
-            if (subtitleEl.textContent !== track.subtitles[index]) {
+            if (subtitleEl.textContent !== currentSubtitles[index]) {
                 if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
                 subtitleEl.style.opacity = '0';
                 subtitleFadeTimeout = setTimeout(() => {
-                    subtitleEl.textContent = track.subtitles[index];
+                    subtitleEl.textContent = currentSubtitles[index];
                     subtitleEl.style.opacity = '1';
                     subtitleFadeTimeout = null;
                 }, 600);
