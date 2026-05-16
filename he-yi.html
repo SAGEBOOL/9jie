@@ -183,9 +183,9 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 14px.
             transition: transform 0.2s;
-            color: #6b7280;
+            color: #fff;
             padding: 0;
             line-height: 1;
         }
@@ -193,7 +193,7 @@
             transform: scale(1.3);
         }
         .comment-like.liked {
-            color: #ef4444;
+            color: #fff;
         }
         
         .comment-item .comment-author {
@@ -1449,7 +1449,7 @@
             <button class="comment-like ${ld.liked ? 'liked' : ''}" 
                     data-like-key="${c._key}"
                     onclick="toggleLike('${c._key}')">
-                ${ld.liked ? '❤️' : '🤍'}${ld.count > 0 ? ' ' + ld.count : ''}
+                ${ld.liked ? '💗' : '💗'}${ld.count > 0 ? ' ' + ld.count : ''}
             </button>
         </div>
         `;
@@ -1479,7 +1479,7 @@
             document.querySelectorAll(`[data-like-key="${key}"]`).forEach(btn => {
                 const d = commentLikeData[key];
                 btn.classList.toggle('liked', d.liked);
-                btn.innerHTML = (d.liked ? '❤️' : '🤍') + (d.count > 0 ? ' ' + d.count : '');
+                btn.innerHTML = '💗' + (d.count > 0 ? ' ' + d.count : '');
             });
         }
         
