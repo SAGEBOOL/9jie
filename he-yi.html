@@ -504,6 +504,7 @@
                     <div class="flex flex-col gap-2" style="flex-shrink: 0;">
                         <button id="bgm-toggle-btn" onclick="toggleBgm()" style="background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="背景音乐开关">🔊</button>
                         <button onclick="toggleSharePanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;" title="分享">🔗</button>
+                        <button id="sleep-timer-btn" onclick="toggleSleepPanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;" title="定时关闭">⏱️</button>
                     </div>
                 </div>
                 
@@ -525,6 +526,38 @@
                         </button>
                     </div>
                     <div id="share-feedback" style="display: none; margin-top: 12px; text-align: center; color: #64ffda; font-size: 13px; padding: 8px; background: rgba(100, 255, 218, 0.05); border-radius: 8px;"></div>
+                </div>
+                
+                <!-- 定时关闭面板 -->
+                <div id="sleep-panel" style="display: none; background: rgba(26, 26, 46, 0.95); border:1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 16px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="color: #e0e0e0; font-size: 14px; font-weight: bold;">⏱️ 定时关闭</h4>
+                        <button onclick="toggleSleepPanel()" style="background: none; border: none; color: #8892b0; cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="space-y-2" style="display: flex; flex-direction: column; gap: 8px;">
+                        <button onclick="setSleepTimer('off')" class="sleep-option" data-mode="off" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">关闭定时</button>
+                        <button onclick="setSleepTimer('endOfTrack')" class="sleep-option" data-mode="endOfTrack" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">播完本集后关闭</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button onclick="setSleepTimer('afterEpisodes', document.getElementById('sleep-episodes').value)" class="sleep-option" data-mode="afterEpisodes" style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">播完</button>
+                            <select id="sleep-episodes" onchange="if(document.querySelector('.sleep-option[data-mode=afterEpisodes]').style.background.includes('rgba(100,255,218')) setSleepTimer('afterEpisodes', this.value)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #e0e0e0; padding: 8px 10px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                                <option value="1">1集</option>
+                                <option value="2">2集</option>
+                                <option value="3">3集</option>
+                                <option value="5">5集</option>
+                                <option value="10">10集</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button onclick="setSleepTimer('afterDuration', document.getElementById('sleep-duration').value)" class="sleep-option" data-mode="afterDuration" style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">定时</button>
+                            <select id="sleep-duration" onchange="if(document.querySelector('.sleep-option[data-mode=afterDuration]').style.background.includes('rgba(100,255,218')) setSleepTimer('afterDuration', this.value)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #e0e0e0; padding: 8px 10px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                                <option value="0.5">0.5小时</option>
+                                <option value="1">1小时</option>
+                                <option value="1.5">1.5小时</option>
+                                <option value="2">2小时</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="sleep-status" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(100, 255, 218, 0.05); border-radius: 8px; color: #64ffda; font-size: 12px; text-align: center;"></div>
                 </div>
                 
                 <!-- 进度条 -->
@@ -698,6 +731,12 @@
         let isBgMusicEnabled = true;  // BGM开关状态（默认开启）
         let podcastPlaybackRate = 1.0;  // 播客语速（默认1.0X）
         
+        // 定时关闭相关变量
+        let sleepTimerMode = 'off';  // 'off' | 'endOfTrack' | 'afterEpisodes' | 'afterDuration'
+        let sleepTimerValue = 0;  // 集数或小时数
+        let sleepTimerTimeout = null;  // setTimeout 引用（用于 afterDuration 模式）
+        let playedEpisodesCount = 0;  // 已播放集数计数器
+        
         // 仅播客模式：检查URL锚点，隐藏非播客内容
         function initPodcastOnlyMode() {
             if (window.location.hash === '#podcast-player') {
@@ -795,6 +834,20 @@
                 updateSubtitle(0); // 初始化字幕
             });
             podcastAudio.addEventListener('ended', () => {
+                // 集数计数器+1
+                playedEpisodesCount++;
+                
+                // 检查定时关闭条件
+                if (sleepTimerMode === 'endOfTrack') {
+                    // 播完本集后关闭
+                    executeSleepTimer();
+                    return;
+                }
+                if (sleepTimerMode === 'afterEpisodes' && playedEpisodesCount >= sleepTimerValue) {
+                    executeSleepTimer();
+                    return;
+                }
+                
                 // 自动播放下一首
                 if (currentPodcastIndex < podcastList.length - 1) {
                     playPodcast(currentPodcastIndex + 1);
@@ -813,6 +866,9 @@
                     if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
                 }
             });
+            
+            // 应用定时模式（afterDuration 需要设置 setTimeout）
+            // 注意：applySleepTimer() 已在 setSleepTimer() 中调用，此处不需要重复调用
         }
         
         function togglePodcast() {
@@ -856,6 +912,141 @@
                 btn.style.color = '#6b7280';
                 if (bgMusic) bgMusic.pause();
             }
+        }
+        
+        // ===== 定时关闭功能 =====
+        
+        function toggleSleepPanel() {
+            const panel = document.getElementById('sleep-panel');
+            const sharePanel = document.getElementById('share-panel');
+            if (panel.style.display === 'none') {
+                // 关闭其他面板
+                if (sharePanel) sharePanel.style.display = 'none';
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        function setSleepTimer(mode, value) {
+            // 取消之前的定时
+            cancelSleepTimer();
+            
+            sleepTimerMode = mode;
+            sleepTimerValue = parseFloat(value) || 0;
+            playedEpisodesCount = 0; // 重置计数器
+            
+            // 更新按钮高亮
+            document.querySelectorAll('.sleep-option').forEach(btn => {
+                const btnMode = btn.dataset.mode;
+                if (btnMode === mode) {
+                    btn.style.background = 'rgba(100, 255, 218, 0.15)';
+                    btn.style.borderColor = 'rgba(100, 255, 218, 0.4)';
+                    btn.style.color = '#64ffda';
+                } else {
+                    btn.style.background = 'rgba(255, 255, 255, 0.05)';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    btn.style.color = '#8892b0';
+                }
+            });
+            
+            // 应用定时
+            applySleepTimer();
+            
+            // 显示状态
+            updateSleepTimerDisplay();
+            
+            // 如果当前正在播放，提示已设置
+            if (isPodcastPlaying) {
+                showSleepFeedback('✅ 定时关闭已设置');
+            }
+        }
+        
+        function applySleepTimer() {
+            if (sleepTimerMode === 'afterDuration' && sleepTimerValue > 0) {
+                // 设置倒计时（小时转毫秒）
+                const ms = sleepTimerValue * 60 * 60 * 1000;
+                sleepTimerTimeout = setTimeout(() => {
+                    executeSleepTimer();
+                }, ms);
+            }
+        }
+        
+        function executeSleepTimer() {
+            // 暂停播放
+            if (podcastAudio) {
+                podcastAudio.pause();
+                podcastAudio.currentTime = 0;
+            }
+            isPodcastPlaying = false;
+            document.getElementById('podcast-play-btn').textContent = '▶️';
+            if (bgMusic) bgMusic.pause();
+            document.getElementById('podcast-cover').style.animationPlayState = 'paused';
+            
+            // 隐藏字幕
+            if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
+            const wrapEl = document.getElementById('podcast-subtitle-wrap');
+            if (wrapEl) wrapEl.style.display = 'none';
+            const subtitleEl = document.getElementById('podcast-subtitle');
+            if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
+            
+            // 重置定时状态
+            sleepTimerMode = 'off';
+            sleepTimerValue = 0;
+            if (sleepTimerTimeout) clearTimeout(sleepTimerTimeout);
+            sleepTimerTimeout = null;
+            
+            // 重置按钮样式
+            document.querySelectorAll('.sleep-option').forEach(btn => {
+                btn.style.background = 'rgba(255, 255, 255, 0.05)';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                btn.style.color = '#8892b0';
+            });
+            
+            // 显示提示
+            showSleepFeedback('⏱️ 定时关闭已触发，播放已停止');
+            
+            // 隐藏状态显示
+            const statusEl = document.getElementById('sleep-status');
+            if (statusEl) statusEl.style.display = 'none';
+        }
+        
+        function cancelSleepTimer() {
+            if (sleepTimerTimeout) {
+                clearTimeout(sleepTimerTimeout);
+                sleepTimerTimeout = null;
+            }
+        }
+        
+        function updateSleepTimerDisplay() {
+            const statusEl = document.getElementById('sleep-status');
+            if (!statusEl) return;
+            
+            if (sleepTimerMode === 'off') {
+                statusEl.style.display = 'none';
+                return;
+            }
+            
+            statusEl.style.display = 'block';
+            let text = '⏱️ 定时关闭：';
+            if (sleepTimerMode === 'endOfTrack') {
+                text += '本集播完';
+            } else if (sleepTimerMode === 'afterEpisodes') {
+                text += '剩余 ' + (sleepTimerValue - playedEpisodesCount) + ' 集';
+            } else if (sleepTimerMode === 'afterDuration') {
+                text += sleepTimerValue + ' 小时';
+            }
+            statusEl.textContent = text;
+        }
+        
+        function showSleepFeedback(message) {
+            const statusEl = document.getElementById('sleep-status');
+            if (!statusEl) return;
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+            setTimeout(() => {
+                updateSleepTimerDisplay();
+            }, 3000);
         }
         
         // 语速调节
