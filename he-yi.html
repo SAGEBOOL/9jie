@@ -1415,8 +1415,16 @@
         // 用户留言数组（初始为空，匿名用户可添加）
         let userComments = [];
         
-        // 留言点赞数据：{ "preset_0": { count: 3, liked: true }, "user_1715000000": { count: 1, liked: false } }
+        // 留言点赞数据：{ "preset_0": { count: 3, liked: false }, "user_1715000000": { count: 1, liked: false } }
         let commentLikeData = JSON.parse(localStorage.getItem('heyi_comment_likes') || '{}');
+        // 预置留言首次加载时生成随机点赞数（3~99），存到 localStorage
+        presetComments.forEach((c, i) => {
+            const key = 'preset_' + i;
+            if (!commentLikeData[key]) {
+                commentLikeData[key] = { count: Math.floor(Math.random() * 97) + 3, liked: false };
+            }
+        });
+        localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
         
         // 渲染留言列表（预置+用户留言，重复一份实现无缝滚动）
         function renderComments() {
