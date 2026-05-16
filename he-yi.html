@@ -129,18 +129,9 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 字幕滚动动画 */
-        @keyframes subtitleScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-
-        .subtitle-scrolling {
-            animation: subtitleScroll 8s linear infinite;
-        }
-
-        .subtitle-paused {
-            animation-play-state: paused !important;
+        /* 字幕淡入动画 */
+        #podcast-subtitle {
+            transition: opacity 0.6s ease;
         }
         
         @media (max-width: 768px) {
@@ -501,9 +492,13 @@
                     </div>
                     <div class="flex-1">
                         <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
+                        <div id="podcast-copyright" style="display: none; text-align: center; margin-bottom: 8px;">
+                            <p style="color: #ffffff; font-family: 'FangSong', 'STFangsong', '仿宋', serif; font-size: 12px; margin-bottom: 2px;">版权© 2026 DSArt+AI STUDIO</p>
+                            <p style="color: #8892b0; font-size: 11px;">联系作者 WeChat: SAGEBOOK</p>
+                        </div>
                         <p id="podcast-desc" style="color: #8892b0; font-size: 13px;">点击曲目开始聆听</p>
-                        <div id="podcast-subtitle-wrap" style="overflow: hidden; margin-top: 6px; height: 22px; position: relative; display: none;">
-                            <p id="podcast-subtitle" style="color: #64ffda; font-size: 13px; white-space: nowrap; position: absolute; left: 100%; animation: subtitleScroll 8s linear infinite;"></p>
+                        <div id="podcast-subtitle-wrap" style="display: none; margin-top: 8px; height: 24px; overflow: hidden; position: relative;">
+                            <p id="podcast-subtitle" style="color: #64ffda; font-size: 14px; text-align: center; opacity: 0;"></p>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2" style="flex-shrink: 0;">
@@ -760,6 +755,8 @@
             // 更新UI
             document.getElementById('podcast-title').textContent = track.name;
             document.getElementById('podcast-desc').textContent = '点击曲目开始聆听';
+            const copyrightEl = document.getElementById('podcast-copyright');
+            if (copyrightEl) copyrightEl.style.display = 'block';
             const subtitleWrap = document.getElementById('podcast-subtitle-wrap');
             if (subtitleWrap) subtitleWrap.style.display = 'block';
             
@@ -809,8 +806,11 @@
                     // 暂停黑胶唱片旋转动画
                     document.getElementById('podcast-cover').style.animationPlayState = 'paused';
                     // 隐藏字幕
-                    const subtitleWrap = document.getElementById('podcast-subtitle-wrap');
-                    if (subtitleWrap) subtitleWrap.style.display = 'none';
+                    if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
+                    const wrapEl = document.getElementById('podcast-subtitle-wrap');
+                    if (wrapEl) wrapEl.style.display = 'none';
+                    const subtitleEl = document.getElementById('podcast-subtitle');
+                    if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
                 }
             });
         }
@@ -898,6 +898,7 @@
             updateSubtitle(podcastAudio.currentTime);
         }
 
+        let subtitleFadeTimeout = null;
         function updateSubtitle(currentTime) {
             if (currentPodcastIndex < 0) return;
             const track = podcastList[currentPodcastIndex];
@@ -908,15 +909,17 @@
                 track.subtitles.length - 1
             );
             const subtitleEl = document.getElementById('podcast-subtitle');
-            if (subtitleEl && subtitleEl.textContent !== track.subtitles[index]) {
-                subtitleEl.textContent = track.subtitles[index];
-                subtitleEl.style.left = '100%';
-                subtitleEl.style.animation = 'none';
-                subtitleEl.offsetHeight; // 强制重绘
-                subtitleEl.style.animation = 'subtitleScroll 8s linear infinite';
-                if (!isPodcastPlaying) {
-                    subtitleEl.style.animationPlayState = 'paused';
-                }
+            const wrapEl = document.getElementById('podcast-subtitle-wrap');
+            if (!subtitleEl || !wrapEl) return;
+            wrapEl.style.display = 'block';
+            if (subtitleEl.textContent !== track.subtitles[index]) {
+                if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
+                subtitleEl.style.opacity = '0';
+                subtitleFadeTimeout = setTimeout(() => {
+                    subtitleEl.textContent = track.subtitles[index];
+                    subtitleEl.style.opacity = '1';
+                    subtitleFadeTimeout = null;
+                }, 600);
             }
         }
         
