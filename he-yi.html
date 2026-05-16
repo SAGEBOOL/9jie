@@ -1426,8 +1426,9 @@
         });
         localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
         
-        // 渲染留言列表（随机更换模式）
+        // 渲染留言列表（顺序滚动模式）
         let commentScrollTimer = null;
+        let currentCommentIndex = 0;
         function renderComments() {
             const container = document.getElementById('comment-scroll-content');
             if (!container) return;
@@ -1443,9 +1444,8 @@
             // 清空旧定时器
             if (commentScrollTimer) clearInterval(commentScrollTimer);
 
-            // 初始随机选5条显示
-            const shuffled = [...allComments].sort(() => Math.random() - 0.5);
-            const visible = shuffled.slice(0, Math.min(5, allComments.length));
+            // 每次重新渲染时，重置为从第1条开始
+            currentCommentIndex = 0;
 
             function buildHTML(list) {
                 return list.map(c => {
@@ -1464,18 +1464,30 @@
                 }).join('');
             }
 
-            container.innerHTML = buildHTML(visible);
+            // 显示当前批次（5条）
+            function showCurrentBatch() {
+                const total = allComments.length;
+                if (total <= 5) {
+                    container.innerHTML = buildHTML(allComments);
+                    return;
+                }
+                const batch = [];
+                for (let i = 0; i < 5; i++) {
+                    batch.push(allComments[(currentCommentIndex + i) % total]);
+                }
+                container.innerHTML = buildHTML(batch);
+            }
 
-            // 每3秒随机替换一条留言
-            commentScrollTimer = setInterval(() => {
-                const currentKeys = visible.map(c => c._key);
-                const candidates = allComments.filter(c => !currentKeys.includes(c._key));
-                if (candidates.length === 0) return;
-                const replaceIdx = Math.floor(Math.random() * visible.length);
-                const newItem = candidates[Math.floor(Math.random() * candidates.length)];
-                visible[replaceIdx] = newItem;
-                container.innerHTML = buildHTML(visible);
-            }, 3000);
+            showCurrentBatch();
+
+            // 仅当留言超过5条时，每3秒滚动到下一批5条（顺序循环）
+            if (allComments.length > 5) {
+                commentScrollTimer = setInterval(() => {
+                    const total = allComments.length;
+                    currentCommentIndex = (currentCommentIndex + 5) % total;
+                    showCurrentBatch();
+                }, 3000);
+            }
         }
 
         // 点赞/取消点赞
