@@ -489,7 +489,10 @@
                         <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
                         <p id="podcast-desc" style="color: #8892b0; font-size: 13px;">云希（男声）朗读</p>
                     </div>
-                    <button onclick="toggleSharePanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="分享">🔗</button>
+                    <div class="flex flex-col gap-2" style="flex-shrink: 0;">
+                        <button id="bgm-toggle-btn" onclick="toggleBgm()" style="background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="背景音乐开关">🔊</button>
+                        <button onclick="toggleSharePanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;" title="分享">🔗</button>
+                    </div>
                 </div>
                 
                 <!-- 分享面板 -->
@@ -523,11 +526,20 @@
                     </div>
                 </div>
                 
-                <!-- 控制按钮 -->
+                <!-- 控制按钮 + 语速 -->
                 <div class="flex items-center justify-center gap-4 mb-6">
                     <button onclick="prevPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏮</button>
                     <button id="podcast-play-btn" onclick="togglePodcast()" style="background: linear-gradient(135deg, #64ffda, #a78bfa); border: none; color: #1a1a2e; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(100, 255, 218, 0.3);">▶️</button>
                     <button onclick="nextPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏭</button>
+                </div>
+                
+                <!-- 语速调节 -->
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span style="color: #6b7280; font-size: 12px; margin-right: 4px;">语速</span>
+                    <button class="speed-btn" data-speed="0.5" onclick="setPlaybackRate(0.5)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">0.5X</button>
+                    <button class="speed-btn" data-speed="0.75" onclick="setPlaybackRate(0.75)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">0.75X</button>
+                    <button class="speed-btn" data-speed="1.0" onclick="setPlaybackRate(1.0)" style="background: rgba(100, 255, 218, 0.15); border: 1px solid rgba(100, 255, 218, 0.4); color: #64ffda; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">1.0X</button>
+                    <button class="speed-btn" data-speed="1.25" onclick="setPlaybackRate(1.25)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">1.2X</button>
                 </div>
                 
                 <!-- 播放列表 -->
@@ -658,7 +670,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量5%）</p>
+                <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量2%，可开关）</p>
             </div>
         </section>
 
@@ -679,11 +691,45 @@
         let isPodcastPlaying = false;
         let podcastAudio = null;
         let bgMusic = null;
+        let isBgMusicEnabled = true;  // BGM开关状态（默认开启）
+        let podcastPlaybackRate = 1.0;  // 播客语速（默认1.0X）
+        
+        // 仅播客模式：检查URL锚点，隐藏非播客内容
+        function initPodcastOnlyMode() {
+            if (window.location.hash === '#podcast-player') {
+                // 隐藏页面其他板块
+                const sections = document.querySelectorAll('section');
+                sections.forEach(sec => {
+                    if (!sec.querySelector('#podcast-player')) {
+                        sec.style.display = 'none';
+                    }
+                });
+                // 隐藏导航栏
+                const nav = document.querySelector('nav');
+                if (nav) nav.style.display = 'none';
+                // 隐藏返回按钮
+                const backBtn = document.querySelector('.back-button');
+                if (backBtn) backBtn.style.display = 'none';
+                // 隐藏移动端导航
+                const mobileNav = document.querySelector('.fixed.bottom-0');
+                if (mobileNav) mobileNav.style.display = 'none';
+                // 调整播客容器样式
+                const player = document.getElementById('podcast-player');
+                if (player) {
+                    player.parentElement.style.maxWidth = '700px';
+                    player.parentElement.style.margin = '20px auto';
+                    player.parentElement.style.padding = '0 16px';
+                }
+                // 隐藏提示条
+                const tip = document.querySelector('#podcast-player').parentElement.nextElementSibling;
+                if (tip) tip.style.display = 'none';
+            }
+        }
         
         function initBgMusic() {
             if (!bgMusic) {
                 bgMusic = new Audio('assets/music/月下孤城 (1).mp3');
-                bgMusic.volume = 0.05;  // 固定5%音量
+                bgMusic.volume = 0.02;  // 固定2%音量（不可调节）
                 bgMusic.loop = true;
             }
         }
@@ -720,6 +766,7 @@
             });
             
             // 播放
+            podcastAudio.playbackRate = podcastPlaybackRate;  // 应用语速
             podcastAudio.play();
             isPodcastPlaying = true;
             document.getElementById('podcast-play-btn').textContent = '⏸️';
@@ -727,9 +774,11 @@
             // 启动黑胶唱片旋转动画
             document.getElementById('podcast-cover').style.animationPlayState = 'running';
             
-            // 自动播放背景音乐（5%音量）
-            initBgMusic();
-            bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+            // 自动播放背景音乐（2%音量，受BGM开关控制）
+            if (isBgMusicEnabled) {
+                initBgMusic();
+                bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+            }
             
             // 更新进度条
             podcastAudio.addEventListener('timeupdate', updatePodcastProgress);
@@ -753,29 +802,63 @@
         
         function togglePodcast() {
             if (currentPodcastIndex === -1) {
-                // 没有选中曲目，播放第一首
                 playPodcast(0);
                 return;
             }
-            
             if (isPodcastPlaying) {
                 podcastAudio.pause();
                 isPodcastPlaying = false;
                 document.getElementById('podcast-play-btn').textContent = '▶️';
                 if (bgMusic) bgMusic.pause();
-                // 暂停黑胶唱片旋转动画
                 document.getElementById('podcast-cover').style.animationPlayState = 'paused';
             } else {
+                podcastAudio.playbackRate = podcastPlaybackRate;
                 podcastAudio.play();
                 isPodcastPlaying = true;
                 document.getElementById('podcast-play-btn').textContent = '⏸️';
-                if (bgMusic) bgMusic.play().catch(e => {});
-                // 恢复黑胶唱片旋转动画
+                if (bgMusic && isBgMusicEnabled) bgMusic.play().catch(e => {});
                 document.getElementById('podcast-cover').style.animationPlayState = 'running';
             }
         }
         
-        function prevPodcast() {
+        // BGM开关
+        function toggleBgm() {
+            isBgMusicEnabled = !isBgMusicEnabled;
+            const btn = document.getElementById('bgm-toggle-btn');
+            if (isBgMusicEnabled) {
+                btn.textContent = '🔊';
+                btn.style.background = 'rgba(100,255,218,0.1)';
+                btn.style.borderColor = 'rgba(100,255,218,0.3)';
+                btn.style.color = '#64ffda';
+                if (isPodcastPlaying && bgMusic) bgMusic.play().catch(e => {});
+            } else {
+                btn.textContent = '🔇';
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.borderColor = 'rgba(255,255,255,0.1)';
+                btn.style.color = '#6b7280';
+                if (bgMusic) bgMusic.pause();
+            }
+        }
+        
+        // 语速调节
+        function setPlaybackRate(rate) {
+            podcastPlaybackRate = rate;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                const r = parseFloat(btn.dataset.speed);
+                if (r === rate) {
+                    btn.style.background = 'rgba(100,255,218,0.15)';
+                    btn.style.borderColor = 'rgba(100,255,218,0.4)';
+                    btn.style.color = '#64ffda';
+                } else {
+                    btn.style.background = 'rgba(255,255,255,0.05)';
+                    btn.style.borderColor = 'rgba(255,255,255,0.1)';
+                    btn.style.color = '#8892b0';
+                }
+            });
+            if (podcastAudio && isPodcastPlaying) {
+                podcastAudio.playbackRate = rate;
+            }
+        }
             if (currentPodcastIndex > 0) {
                 playPodcast(currentPodcastIndex - 1);
             }
@@ -821,16 +904,16 @@
         
         function getPodcastShareText() {
             if (currentPodcastIndex < 0) {
-                return '【九界修真】河一声书 - 云希（男声）朗读版，欢迎收听！';
+                return '【九界修真·河一声书】云希（男声）朗读，点击收听！';
             }
-            const trackName = podcastList[currentPodcastIndex].name;
-            const trackDesc = podcastList[currentPodcastIndex].desc;
-            return '【九界修真】' + trackName + ' — ' + trackDesc + '\n🎧 欢迎收听河一声书';
+            const t = podcastList[currentPodcastIndex];
+            return '【九界修真·河一声书】' + t.name + ' — ' + t.desc + '，点击收听！';
         }
         
         function getPodcastShareUrl() {
-            // 只分享播客板块，不包含页面其他内容
-            return window.location.href.split('#')[0] + '#podcast-player';
+            // 分享链接仅指向播客容器，打开后只显示播客内容
+            const base = window.location.href.split('#')[0];
+            return base + '#podcast-player';
         }
         
         function copyPodcastLink() {
@@ -982,6 +1065,7 @@
 
         // 页面加载后的初始化
         document.addEventListener('DOMContentLoaded', () => {
+            initPodcastOnlyMode();  // 检查是否仅播客模式
             // 触发首次动画
             setTimeout(() => {
                 document.querySelectorAll('.fade-in').forEach(el => {
