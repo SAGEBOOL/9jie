@@ -932,6 +932,8 @@
             // 播放
             podcastAudio.playbackRate = podcastPlaybackRate;  // 应用语速
             podcastAudio.play();
+            // 增量播放计数
+            if (window.incrementPlayCount) window.incrementPlayCount();
             isPodcastPlaying = true;
             document.getElementById('podcast-play-btn').textContent = '⏸️';
             
@@ -1512,5 +1514,67 @@
             }, 100);
         });
     </script>
+
+    <!-- 播放计数器（右下角） -->
+    <div id="play-counter" style="position: fixed; bottom: 60px; right: 20px; z-index: 999; background: rgba(26, 26, 46, 0.92); backdrop-filter: blur(12px); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 14px; padding: 12px 16px; font-size: 12px; color: #8892b0; line-height: 1.8; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: opacity 0.3s; cursor: default;">
+        <div style="color: #64ffda; font-size: 13px; font-weight: bold; margin-bottom: 4px;">🎧 播放统计</div>
+        <div>你是第 <span id="listener-count" style="color: #e0e0e0; font-weight: bold;">2890</span> 位听友</div>
+        <div>该故事总计已播放 <span id="play-count" style="color: #e0e0e0; font-weight: bold;">50000.00</span>+ 次</div>
+    </div>
+    
+    <script>
+    // 播放计数器逻辑
+    (function() {
+        const BASE_LISTENERS = 2890;
+        const BASE_PLAYS = 50000.00;
+        const STORAGE_KEY_LISTENER = 'heyi_listener_count';
+        const STORAGE_KEY_PLAYS = 'heyi_play_count';
+        const STORAGE_KEY_VISITED = 'heyi_visited';
+
+        // 初始化听友数（仅首次访问时+1）
+        let listeners = parseInt(localStorage.getItem(STORAGE_KEY_LISTENER)) || 0;
+        if (!localStorage.getItem(STORAGE_KEY_VISITED)) {
+            listeners++;
+            localStorage.setItem(STORAGE_KEY_LISTENER, listeners);
+            localStorage.setItem(STORAGE_KEY_VISITED, 'true');
+        }
+
+        // 初始化播放次数
+        let plays = parseFloat(localStorage.getItem(STORAGE_KEY_PLAYS)) || 0;
+
+        // 更新显示
+        function updateCounterDisplay() {
+            const listenerEl = document.getElementById('listener-count');
+            const playEl = document.getElementById('play-count');
+            if (listenerEl) listenerEl.textContent = BASE_LISTENERS + listeners;
+            if (playEl) playEl.textContent = (BASE_PLAYS + plays).toFixed(2);
+        }
+
+        // 增量播放次数（供 playPodcast 调用）
+        window.incrementPlayCount = function() {
+            plays += 1;
+            localStorage.setItem(STORAGE_KEY_PLAYS, plays);
+            updateCounterDisplay();
+        };
+
+        // 页面加载时显示
+        updateCounterDisplay();
+
+        // 模拟其他用户访问（每30-60秒随机+1听友，仅前端效果）
+        setInterval(() => {
+            const simulated = parseInt(localStorage.getItem(STORAGE_KEY_LISTENER)) || 0;
+            localStorage.setItem(STORAGE_KEY_LISTENER, simulated + 1);
+            updateCounterDisplay();
+        }, 30000 + Math.random() * 30000);
+
+        // 模拟其他播放（每10-20秒随机+0.01-0.99）
+        setInterval(() => {
+            const simulated = parseFloat(localStorage.getItem(STORAGE_KEY_PLAYS)) || 0;
+            localStorage.setItem(STORAGE_KEY_PLAYS, simulated + Math.round(Math.random() * 99) / 100);
+            updateCounterDisplay();
+        }, 10000 + Math.random() * 10000);
+    })();
+    </script>
+
 </body>
 </html>
