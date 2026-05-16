@@ -895,11 +895,21 @@
             }
         }
         
+        let isSettingVolume = false;  // 防止 volumechange 事件递归
         function initBgMusic() {
             if (!bgMusic) {
                 bgMusic = new Audio('assets/music/月下孤城 (1).mp3');
-                bgMusic.volume = 0.02;  // 固定2%音量（不可调节）
                 bgMusic.loop = true;
+                bgMusic.volume = 0.02;  // 固定2%音量
+                // 强制音量不超过2%（防止任何途径修改）
+                bgMusic.addEventListener('volumechange', () => {
+                    if (isSettingVolume) return;
+                    if (bgMusic.volume > 0.02) {
+                        isSettingVolume = true;
+                        bgMusic.volume = 0.02;
+                        isSettingVolume = false;
+                    }
+                });
             }
         }
         
@@ -951,9 +961,10 @@
             // 启动黑胶唱片旋转动画
             document.getElementById('podcast-cover').style.animationPlayState = 'running';
             
-            // 自动播放背景音乐（2%音量，受BGM开关控制）
+            // 自动播放背景音乐（强制2%音量，受BGM开关控制）
             if (isBgMusicEnabled) {
                 initBgMusic();
+                bgMusic.volume = 0.02;  // 强制2%音量，任何终端都不超过
                 bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
             }
             
@@ -1034,7 +1045,10 @@
                 btn.style.background = 'rgba(100,255,218,0.1)';
                 btn.style.borderColor = 'rgba(100,255,218,0.3)';
                 btn.style.color = '#64ffda';
-                if (isPodcastPlaying && bgMusic) bgMusic.play().catch(e => {});
+                if (bgMusic) {
+                    bgMusic.volume = 0.02;  // 强制2%音量
+                    bgMusic.play().catch(e => {});
+                }
             } else {
                 btn.textContent = '🔇';
                 btn.style.background = 'rgba(255,255,255,0.05)';
