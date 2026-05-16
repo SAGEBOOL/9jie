@@ -457,7 +457,7 @@
         </section>
 
         <!-- 登场作品板块 -->
-        <section class="story-content fade-in" style="margin-top: 30px;">
+        <section class="story-content fade-in" style="margin-top: 30px; position: relative;">
             <h2 class="chapter-title" style="font-size: 24px;">登场作品</h2>
             
             <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">河一登场的经典章节（点击查看详情）</p>
@@ -508,13 +508,13 @@
         </section>
 
         <!-- 播客有声书板块 -->
-        <section class="story-content fade-in" style="margin-top: 30px;">
+        <section class="story-content fade-in" style="margin-top: 30px; position: relative;">
             <h2 class="chapter-title" style="font-size: 24px;">🎧 九界之河一</h2>
             
             <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">点击曲目即可播放</p>
             
             <!-- 播放器容器 -->
-            <div id="podcast-player" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 32px; padding: 32px;">
+            <div id="podcast-player" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 32px; padding: 32px; position: relative;">
                 
                 <!-- 当前播放信息 -->
                 <div class="flex items-center gap-4 mb-6">
@@ -775,11 +775,20 @@
                                 <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
                             </div>
                         </div>
-                    </div>
                 </div>
-            </div>
+            
+        <!-- 播放计数器（播放器容器内右下角） -->
+        <div id="play-counter" style="position: absolute; bottom: 20px; right: 20px; z-index: 10; background: rgba(26, 26, 46, 0.92); backdrop-filter: blur(12px); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 14px; padding: 12px 16px; font-size: 12px; color: #8892b0; line-height: 1.8; cursor: default; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="color: #64ffda; font-size: 13px; font-weight: bold; margin-bottom: 4px;">🎧 播放统计</div>
+            <div>你是第 <span id="listener-count" style="color: #e0e0e0; font-weight: bold;">2890</span> 位听友</div>
+            <div>该故事总计已播放 <span id="play-count" style="color: #e0e0e0; font-weight: bold;">50000.00</span>+ 次</div>
+        </div>
+    </div>
             
         
+        
+        
+
         <!-- 留言区（在播放器容器内） -->
         <div id="comment-section" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
             <h3 style="color: #e0e0e0; font-size: 18px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
@@ -804,6 +813,8 @@
             <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                 <p style="color: #6b7280; font-size: 13px;">💡 提示：播放播客时自动播放背景音乐（音量2%，可开关）</p>
             </div>
+        
+
         </section>
         
 
@@ -1408,7 +1419,7 @@
     </script>
 
         <!-- 相关剧情板块 -->
-        <section class="story-content fade-in" style="margin-top: 30px;">
+        <section class="story-content fade-in" style="margin-top: 30px; position: relative;">
             <h2 class="chapter-title" style="font-size: 24px;">相关剧情</h2>
             
             <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">与河一相关的剧情线和人物关系</p>
@@ -1456,6 +1467,9 @@
                     </div>
                 </div>
             </div>
+
+        <!-- 播放计数器（容器内右下角） -->
+        
         </section>
     </main>
 
@@ -1515,13 +1529,8 @@
         });
     </script>
 
-    <!-- 播放计数器（右下角） -->
-    <div id="play-counter" style="position: fixed; bottom: 60px; right: 20px; z-index: 999; background: rgba(26, 26, 46, 0.92); backdrop-filter: blur(12px); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 14px; padding: 12px 16px; font-size: 12px; color: #8892b0; line-height: 1.8; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: opacity 0.3s; cursor: default;">
-        <div style="color: #64ffda; font-size: 13px; font-weight: bold; margin-bottom: 4px;">🎧 播放统计</div>
-        <div>你是第 <span id="listener-count" style="color: #e0e0e0; font-weight: bold;">2890</span> 位听友</div>
-        <div>该故事总计已播放 <span id="play-count" style="color: #e0e0e0; font-weight: bold;">50000.00</span>+ 次</div>
-    </div>
-    
+
+
     <script>
     // 播放计数器逻辑
     (function() {
@@ -1560,7 +1569,7 @@
         // 页面加载时显示
         updateCounterDisplay();
 
-        // 模拟其他用户访问（每30-60秒随机+1听友，仅前端效果）
+        // 模拟其他用户访问（每30-60秒随机+1听友）
         setInterval(() => {
             const simulated = parseInt(localStorage.getItem(STORAGE_KEY_LISTENER)) || 0;
             localStorage.setItem(STORAGE_KEY_LISTENER, simulated + 1);
@@ -1575,6 +1584,5 @@
         }, 10000 + Math.random() * 10000);
     })();
     </script>
-
 </body>
 </html>
