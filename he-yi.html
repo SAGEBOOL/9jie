@@ -984,11 +984,15 @@
         
 
         
-        <script>
-        // 播客播放器逻辑
+                <script>
+        // ============================================================
+        //  九界之河一 · 播客播放器（完整重写版 2026-05-17）
+        // ============================================================
+
+        // ===== 播放列表 =====
         const podcastList = [
             { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-yi-opening.txt' },
-            { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-yi-chapter-02.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-yi-chapter-02.txt' },
+            { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-y-i-chapter-02.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-y-i-chapter-02.txt' },
             { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', icon: '🎧', subtitleFile: 'assets/subtitles/第四章-散修的规矩.txt' },
             { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第五章-墟界遗址.txt' },
             { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第六章-归来者.txt' },
@@ -1001,74 +1005,71 @@
             { name: '《九界归尘》第十四章：残魂渡', file: 'assets/music/第十四章：残魂渡.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十四章-残魂渡.txt' },
             { name: '《九界归尘》第十五章：墟界深处', file: 'assets/music/第十五章：墟界深处.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十五章-墟界深处.txt' }
         ];
-        
+        window.podcastList = podcastList;
+
+        // ===== 全局状态 =====
         let currentPodcastIndex = -1;
         let isPodcastPlaying = false;
         let podcastAudio = null;
         let bgMusic = null;
-        let isBgMusicEnabled = true;  // BGM开关状态（默认开启）
-        let podcastPlaybackRate = 1.0;  // 播客语速（默认1.0X）
-        
-        // 定时关闭相关变量
-        let sleepTimerMode = 'off';  // 'off' | 'endOfTrack' | 'afterEpisodes' | 'afterDuration'
-        let sleepTimerValue = 0;  // 集数或小时数
-        let sleepTimerTimeout = null;  // setTimeout 引用（用于 afterDuration 模式）
-        let playedEpisodesCount = 0;  // 已播放集数计数器
-        let currentSubtitles = [];  // 当前加载的字幕数组（从外部文件加载）
-        
-        // 加载外部字幕文件
+        let isBgMusicEnabled = true;
+        let podcastPlaybackRate = 1.0;
+        let sleepTimerMode = 'off';
+        let sleepTimerValue = 0;
+        let sleepTimerTimeout = null;
+        let playedEpisodesCount = 0;
+        let currentSubtitles = [];
+        let isSettingVolume = false;
+
+        // ===== 字幕加载 =====
         async function loadSubtitleFile(filePath) {
             try {
                 const response = await fetch(filePath);
                 const text = await response.text();
-                // 按行分割，过滤空行
                 currentSubtitles = text.split('\n').filter(line => line.trim() !== '');
-                console.log('✅ 字幕加载成功：' + filePath + '（' + currentSubtitles.length + ' 句）');
             } catch (e) {
-                console.error('❌ 字幕加载失败：' + filePath, e);
                 currentSubtitles = [];
             }
         }
-        
-        // 仅播客模式：检查URL锚点，隐藏非播客内容
-        function initPodcastOnlyMode() {
-            if (window.location.hash === '#podcast-player') {
-                // 隐藏页面其他板块
-                const sections = document.querySelectorAll('section');
-                sections.forEach(sec => {
-                    if (!sec.querySelector('#podcast-player')) {
-                        sec.style.display = 'none';
-                    }
-                });
-                // 隐藏导航栏
-                const nav = document.querySelector('nav');
-                if (nav) nav.style.display = 'none';
-                // 隐藏返回按钮
-                const backBtn = document.querySelector('.back-button');
-                if (backBtn) backBtn.style.display = 'none';
-                // 隐藏移动端导航
-                const mobileNav = document.querySelector('.fixed.bottom-0');
-                if (mobileNav) mobileNav.style.display = 'none';
-                // 调整播客容器样式
-                const player = document.getElementById('podcast-player');
-                if (player) {
-                    player.parentElement.style.maxWidth = '700px';
-                    player.parentElement.style.margin = '20px auto';
-                    player.parentElement.style.padding = '0 16px';
-                }
-                // 隐藏提示条
-                const tip = document.querySelector('#podcast-player').parentElement.nextElementSibling;
-                if (tip) tip.style.display = 'none';
-            }
+
+        // ===== 字幕更新 =====
+        function updateSubtitle(currentTime) {
+            if (!currentSubtitles.length) return;
+            const el = document.getElementById('subtitle');
+            const wrap = document.getElementById('subtitle-wrap');
+            if (!el || !wrap) return;
+            wrap.style.display = 'block';
+            el.style.opacity = '1';
+            const idx = Math.floor(currentTime) % currentSubtitles.length;
+            el.textContent = currentSubtitles[idx] || '';
         }
-        
-        let isSettingVolume = false;  // 防止 volumechange 事件递归
+
+        // ===== 时间格式化 =====
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        // ===== 进度条更新（防重复绑定版本）=====
+        function updatePodcastProgress() {
+            if (!podcastAudio) return;
+            const bar = document.getElementById('progressBarFill');
+            const ct = document.getElementById('currentTime');
+            if (bar && podcastAudio.duration) {
+                bar.style.width = ((podcastAudio.currentTime / podcastAudio.duration) * 100) + '%';
+            }
+            if (ct) ct.textContent = formatTime(podcastAudio.currentTime);
+            updateSubtitle(podcastAudio.currentTime);
+        }
+
+        // ===== BGM 初始化 =====
         function initBgMusic() {
             if (!bgMusic) {
                 bgMusic = new Audio('assets/music/月下孤城 (1).mp3');
                 bgMusic.loop = true;
-                bgMusic.volume = 0.02;  // 固定2%音量
-                // 强制音量不超过2%（防止任何途径修改）
+                bgMusic.volume = 0.02;
                 bgMusic.addEventListener('volumechange', () => {
                     if (isSettingVolume) return;
                     if (bgMusic.volume > 0.02) {
@@ -1079,1107 +1080,452 @@
                 });
             }
         }
-        
+
+        // ===== 播放指定曲目（核心）=====
         function playPodcast(index) {
             if (index < 0 || index >= podcastList.length) return;
-            
-            // 停止当前播放
+
+            // 停止当前
             if (podcastAudio) {
                 podcastAudio.pause();
                 podcastAudio.currentTime = 0;
+                // 移除旧的事件监听（防止累积）
+                podcastAudio.removeEventListener('timeupdate', updatePodcastProgress);
             }
-            
-            // 播放新曲目
+
             currentPodcastIndex = index;
-            // 同步3D轮播
-            if (window.podcast3DCarousel && window.podcast3DCarousel.activeIndex !== index) {
-                window.podcast3DCarousel.activeIndex = index;
-                window.podcast3DCarousel.updateStyles();
-                if (window.podcast3DCarousel.reRender) window.podcast3DCarousel.reRender();
-            }
             const track = podcastList[index];
             podcastAudio = new Audio(track.file);
-            // 加载外部字幕文件
+            podcastAudio.playbackRate = podcastPlaybackRate;
+
+            // 加载字幕
             if (track.subtitleFile) loadSubtitleFile(track.subtitleFile);
-            
-            // 更新UI
-            document.getElementById('podcast-title').textContent = track.name;
-            document.getElementById('podcast-desc').textContent = '点击曲目开始聆听';
-            const copyrightEl = document.getElementById('podcast-copyright');
-            if (copyrightEl) copyrightEl.style.display = 'block';
-            const subtitleWrap = document.getElementById('podcast-subtitle-wrap');
-            if (subtitleWrap) subtitleWrap.style.display = 'block';
-            
-            // 更新播放列表高亮
-            document.querySelectorAll('.podcast-track').forEach((el, i) => {
-                if (i === index) {
-                    el.style.background = 'rgba(100, 255, 218, 0.08)';
-                    el.style.borderColor = 'rgba(100, 255, 218, 0.2)';
-                    el.querySelector('.track-name').style.color = '#64ffda';
-                } else {
-                    el.style.background = 'rgba(255, 255, 255, 0.03)';
-                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    el.querySelector('.track-name').style.color = '#e0e0e0';
-                }
-            });
-            
-            // 播放
-            podcastAudio.playbackRate = podcastPlaybackRate;  // 应用语速
-            podcastAudio.play();
-            // 增量播放计数
-            if (window.incrementPlayCount) window.incrementPlayCount();
+
+            // 同步 3D 轮播（避免死循环：不直接调用 goTo()）
+            if (window.podcast3DCarousel) {
+                window.podcast3DCarousel.activeIndex = index;
+                window.podcast3DCarousel.updateStyles();
+            }
+
+            // 更新 UI 文字
+            const st = document.getElementById('songTitle');
+            const sa = document.getElementById('songArtist');
+            const mt = document.getElementById('miniTitle');
+            const ma = document.getElementById('miniArtist');
+            if (st) st.textContent = track.name;
+            if (sa) sa.textContent = '九界修真';
+            if (mt) mt.textContent = track.name;
+            if (ma) ma.textContent = '九界修真';
+
+            const pb = document.getElementById('playBtn');
+            if (pb) pb.textContent = '⏸️';
             isPodcastPlaying = true;
-            document.getElementById('podcast-play-btn').textContent = '⏸️';
-            
-            // 启动黑胶唱片旋转动画
-            // document.getElementById('podcast-cover').style.animationPlayState = 'running';
-            
-            // 自动播放背景音乐（强制2%音量，受BGM开关控制）
+
+            // 播放
+            podcastAudio.play().catch(e => {});
+
+            // 播放计数
+            if (window.incrementPlayCount) window.incrementPlayCount();
+
+            // BGM
             if (isBgMusicEnabled) {
                 initBgMusic();
-                bgMusic.volume = 0.02;  // 强制2%音量，任何终端都不超过
-                bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+                bgMusic.volume = 0.02;
+                bgMusic.play().catch(e => {});
             }
-            
-            // 更新进度条
+
+            // 事件（只绑定一次）
             podcastAudio.addEventListener('timeupdate', updatePodcastProgress);
             podcastAudio.addEventListener('loadedmetadata', () => {
-                document.getElementById('podcast-duration').textContent = formatTime(podcastAudio.duration);
-                updateSubtitle(0); // 初始化字幕
+                const tt = document.getElementById('totalTime');
+                if (tt) tt.textContent = formatTime(podcastAudio.duration);
+                updateSubtitle(0);
             });
-            podcastAudio.addEventListener('ended', () => {
-                // 集数计数器+1
-                playedEpisodesCount++;
-                
-                // 检查定时关闭条件
-                if (sleepTimerMode === 'endOfTrack') {
-                    // 播完本集后关闭
-                    executeSleepTimer();
-                    return;
-                }
-                if (sleepTimerMode === 'afterEpisodes' && playedEpisodesCount >= sleepTimerValue) {
-                    executeSleepTimer();
-                    return;
-                }
-                
-                // 自动播放下一首
-                if (currentPodcastIndex < podcastList.length - 1) {
-                    playPodcast(currentPodcastIndex + 1);
-                } else {
-                    // 播放列表结束
-                    isPodcastPlaying = false;
-                    document.getElementById('podcast-play-btn').textContent = '▶️';
-                    if (bgMusic) bgMusic.pause();
-                    // 暂停黑胶唱片旋转动画
-                    // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
-                    // 隐藏字幕
-                    if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
-                    const wrapEl = document.getElementById('podcast-subtitle-wrap');
-                    if (wrapEl) wrapEl.style.display = 'none';
-                    const subtitleEl = document.getElementById('podcast-subtitle');
-                    if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
-                }
-            });
-            
-            // 应用定时模式（afterDuration 需要设置 setTimeout）
-            // 注意：applySleepTimer() 已在 setSleepTimer() 中调用，此处不需要重复调用
+            podcastAudio.addEventListener('ended', onTrackEnded);
         }
-        
-        function togglePodcast() {
-            if (currentPodcastIndex === -1) {
-                playPodcast(0);
-                return;
+
+        // ===== 单曲结束 =====
+        function onTrackEnded() {
+            playedEpisodesCount++;
+            if (sleepTimerMode === 'endOfTrack') { executeSleepTimer(); return; }
+            if (sleepTimerMode === 'afterEpisodes' && playedEpisodesCount >= sleepTimerValue) { executeSleepTimer(); return; }
+            if (currentPodcastIndex < podcastList.length - 1) {
+                playPodcast(currentPodcastIndex + 1);
+            } else {
+                isPodcastPlaying = false;
+                const pb = document.getElementById('playBtn');
+                if (pb) pb.textContent = '▶️';
+                if (bgMusic) bgMusic.pause();
+                const wrap = document.getElementById('subtitle-wrap');
+                const sub = document.getElementById('subtitle');
+                if (wrap) wrap.style.display = 'none';
+                if (sub) { sub.style.opacity = '0'; sub.textContent = ''; }
             }
-            const subtitleEl = document.getElementById('podcast-subtitle');
+        }
+
+        // ===== 播放/暂停 =====
+        function togglePodcast() {
+            if (currentPodcastIndex === -1) { playPodcast(0); return; }
             if (isPodcastPlaying) {
                 podcastAudio.pause();
                 isPodcastPlaying = false;
-                document.getElementById('podcast-play-btn').textContent = '▶️';
+                const pb = document.getElementById('playBtn');
+                if (pb) pb.textContent = '▶️';
                 if (bgMusic) bgMusic.pause();
-                // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
-                if (subtitleEl) subtitleEl.style.animationPlayState = 'paused';
             } else {
                 podcastAudio.playbackRate = podcastPlaybackRate;
-                podcastAudio.play();
+                podcastAudio.play().catch(e => {});
                 isPodcastPlaying = true;
-                document.getElementById('podcast-play-btn').textContent = '⏸️';
+                const pb = document.getElementById('playBtn');
+                if (pb) pb.textContent = '⏸️';
                 if (bgMusic && isBgMusicEnabled) bgMusic.play().catch(e => {});
-                // document.getElementById('podcast-cover').style.animationPlayState = 'running';
-                if (subtitleEl) subtitleEl.style.animationPlayState = 'running';
             }
         }
-        
-        // BGM开关
+
+        // ===== BGM 开关 =====
         function toggleBgm() {
             isBgMusicEnabled = !isBgMusicEnabled;
-            const btn = document.getElementById('bgm-toggle-btn');
+            const btn = document.getElementById('bgmToggleBtn');
             if (isBgMusicEnabled) {
-                btn.textContent = '🔊';
-                btn.style.background = 'rgba(100,255,218,0.1)';
-                btn.style.borderColor = 'rgba(100,255,218,0.3)';
-                btn.style.color = '#64ffda';
-                if (bgMusic) {
-                    bgMusic.volume = 0.02;  // 强制2%音量
-                    bgMusic.play().catch(e => {});
-                }
+                if (btn) { btn.textContent = '🔊'; btn.style.background = 'rgba(100,255,218,0.1)'; btn.style.borderColor = 'rgba(100,255,218,0.3)'; btn.style.color = '#64ffda'; }
+                if (bgMusic) { bgMusic.volume = 0.02; bgMusic.play().catch(e => {}); }
             } else {
-                btn.textContent = '🔇';
-                btn.style.background = 'rgba(255,255,255,0.05)';
-                btn.style.borderColor = 'rgba(255,255,255,0.1)';
-                btn.style.color = '#6b7280';
+                if (btn) { btn.textContent = '🔇'; btn.style.background = 'rgba(255,255,255,0.05)'; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.color = '#6b7280'; }
                 if (bgMusic) bgMusic.pause();
             }
         }
-        
-        // ===== 定时关闭功能 =====
-        
+
+        // ===== 定时关闭 =====
         function toggleSleepPanel() {
-            const panel = document.getElementById('sleep-panel');
-            const sharePanel = document.getElementById('share-panel');
-            if (panel.style.display === 'none') {
-                // 关闭其他面板
-                if (sharePanel) sharePanel.style.display = 'none';
-                panel.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
-            }
+            const p = document.getElementById('sleep-panel');
+            const sp = document.getElementById('share-panel');
+            if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            if (sp) sp.style.display = 'none';
         }
-        
         function setSleepTimer(mode, value) {
-            // 取消之前的定时
             cancelSleepTimer();
-            
             sleepTimerMode = mode;
             sleepTimerValue = parseFloat(value) || 0;
-            playedEpisodesCount = 0; // 重置计数器
-            
-            // 更新按钮高亮
+            playedEpisodesCount = 0;
             document.querySelectorAll('.sleep-option').forEach(btn => {
-                const btnMode = btn.dataset.mode;
-                if (btnMode === mode) {
-                    btn.style.background = 'rgba(100, 255, 218, 0.15)';
-                    btn.style.borderColor = 'rgba(100, 255, 218, 0.4)';
-                    btn.style.color = '#64ffda';
-                } else {
-                    btn.style.background = 'rgba(255, 255, 255, 0.05)';
-                    btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    btn.style.color = '#8892b0';
-                }
+                btn.style.background = btn.dataset.mode === mode ? 'rgba(100,255,218,0.15)' : 'rgba(255,255,255,0.05)';
+                btn.style.borderColor = btn.dataset.mode === mode ? 'rgba(100,255,218,0.4)' : 'rgba(255,255,255,0.1)';
+                btn.style.color = btn.dataset.mode === mode ? '#64ffda' : '#8892b0';
             });
-            
-            // 应用定时
             applySleepTimer();
-            
-            // 显示状态
             updateSleepTimerDisplay();
-            
-            // 如果当前正在播放，提示已设置
-            if (isPodcastPlaying) {
-                showSleepFeedback('✅ 定时关闭已设置');
-            }
+            if (isPodcastPlaying) showSleepFeedback('✅ 定时关闭已设置');
         }
-        
         function applySleepTimer() {
             if (sleepTimerMode === 'afterDuration' && sleepTimerValue > 0) {
-                // 设置倒计时（小时转毫秒）
-                const ms = sleepTimerValue * 60 * 60 * 1000;
-                sleepTimerTimeout = setTimeout(() => {
-                    executeSleepTimer();
-                }, ms);
+                sleepTimerTimeout = setTimeout(() => { executeSleepTimer(); }, sleepTimerValue * 3600000);
             }
         }
-        
         function executeSleepTimer() {
-            // 暂停播放
-            if (podcastAudio) {
-                podcastAudio.pause();
-                podcastAudio.currentTime = 0;
-            }
+            if (podcastAudio) { podcastAudio.pause(); podcastAudio.currentTime = 0; }
             isPodcastPlaying = false;
-            document.getElementById('podcast-play-btn').textContent = '▶️';
+            const pb = document.getElementById('playBtn');
+            if (pb) pb.textContent = '▶️';
             if (bgMusic) bgMusic.pause();
-            // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
-            
-            // 隐藏字幕
-            if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
-            const wrapEl = document.getElementById('podcast-subtitle-wrap');
-            if (wrapEl) wrapEl.style.display = 'none';
-            const subtitleEl = document.getElementById('podcast-subtitle');
-            if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
-            
-            // 重置定时状态
-            sleepTimerMode = 'off';
-            sleepTimerValue = 0;
-            if (sleepTimerTimeout) clearTimeout(sleepTimerTimeout);
-            sleepTimerTimeout = null;
-            
-            // 重置按钮样式
+            const wrap = document.getElementById('subtitle-wrap');
+            const sub = document.getElementById('subtitle');
+            if (wrap) wrap.style.display = 'none';
+            if (sub) { sub.style.opacity = '0'; sub.textContent = ''; }
+            sleepTimerMode = 'off'; sleepTimerValue = 0;
+            if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
             document.querySelectorAll('.sleep-option').forEach(btn => {
-                btn.style.background = 'rgba(255, 255, 255, 0.05)';
-                btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.borderColor = 'rgba(255,255,255,0.1)';
                 btn.style.color = '#8892b0';
             });
-            
-            // 显示提示
-            showSleepFeedback('⏱️ 定时关闭已触发，播放已停止');
-            
-            // 隐藏状态显示
-            const statusEl = document.getElementById('sleep-status');
-            if (statusEl) statusEl.style.display = 'none';
+            showSleepFeedback('⏱️ 定时关闭已触发');
+            const st = document.getElementById('sleep-status');
+            if (st) st.style.display = 'none';
         }
-        
-        function cancelSleepTimer() {
-            if (sleepTimerTimeout) {
-                clearTimeout(sleepTimerTimeout);
-                sleepTimerTimeout = null;
-            }
-        }
-        
+        function cancelSleepTimer() { if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; } }
         function updateSleepTimerDisplay() {
-            const statusEl = document.getElementById('sleep-status');
-            if (!statusEl) return;
-            
-            if (sleepTimerMode === 'off') {
-                statusEl.style.display = 'none';
-                return;
-            }
-            
-            statusEl.style.display = 'block';
-            let text = '⏱️ 定时关闭：';
-            if (sleepTimerMode === 'endOfTrack') {
-                text += '本集播完';
-            } else if (sleepTimerMode === 'afterEpisodes') {
-                text += '剩余 ' + (sleepTimerValue - playedEpisodesCount) + ' 集';
-            } else if (sleepTimerMode === 'afterDuration') {
-                text += sleepTimerValue + ' 小时';
-            }
-            statusEl.textContent = text;
+            const st = document.getElementById('sleep-status');
+            if (!st) return;
+            if (sleepTimerMode === 'off') { st.style.display = 'none'; return; }
+            st.style.display = 'block';
+            let t = '⏱️ 定时关闭：';
+            if (sleepTimerMode === 'endOfTrack') t += '播完本集';
+            else if (sleepTimerMode === 'afterEpisodes') t += '播完' + sleepTimerValue + '集';
+            else if (sleepTimerMode === 'afterDuration') t += sleepTimerValue + '小时';
+            st.textContent = t;
         }
-        
-        function showSleepFeedback(message) {
-            const statusEl = document.getElementById('sleep-status');
-            if (!statusEl) return;
-            statusEl.textContent = message;
-            statusEl.style.display = 'block';
-            setTimeout(() => {
-                updateSleepTimerDisplay();
-            }, 3000);
-        }
-        
-        // 语速调节
-        function setPlaybackRate(rate) {
-            podcastPlaybackRate = rate;
-            document.querySelectorAll('.speed-btn').forEach(btn => {
-                const r = parseFloat(btn.dataset.speed);
-                if (r === rate) {
-                    btn.style.background = 'rgba(100,255,218,0.15)';
-                    btn.style.borderColor = 'rgba(100,255,218,0.4)';
-                    btn.style.color = '#64ffda';
-                } else {
-                    btn.style.background = 'rgba(255,255,255,0.05)';
-                    btn.style.borderColor = 'rgba(255,255,255,0.1)';
-                    btn.style.color = '#8892b0';
-                }
-            });
-            if (podcastAudio && isPodcastPlaying) {
-                podcastAudio.playbackRate = rate;
-            }
+        function showSleepFeedback(msg) {
+            const fb = document.getElementById('sleep-feedback');
+            if (!fb) return;
+            fb.textContent = msg;
+            fb.style.display = 'block';
+            setTimeout(() => { fb.style.display = 'none'; }, 3000);
         }
 
-        function prevPodcast() {
-            if (currentPodcastIndex > 0) {
-                playPodcast(currentPodcastIndex - 1);
-            }
-        }
-
-        function nextPodcast() {
-            if (currentPodcastIndex < podcastList.length - 1) {
-                playPodcast(currentPodcastIndex + 1);
-            }
-        }
-        
-        function updatePodcastProgress() {
-            if (!podcastAudio) return;
-            const progress = (podcastAudio.currentTime / podcastAudio.duration) * 100;
-            document.getElementById('podcast-progress').style.width = progress + '%';
-            document.getElementById('podcast-current-time').textContent = formatTime(podcastAudio.currentTime);
-            updateSubtitle(podcastAudio.currentTime);
-        }
-
-        let subtitleFadeTimeout = null;
-        function updateSubtitle(currentTime) {
-            if (currentPodcastIndex < 0) return;
-            if (!currentSubtitles || currentSubtitles.length === 0) return;
-            const duration = podcastAudio.duration || 1;
-            const index = Math.min(
-                Math.floor((currentTime / duration) * currentSubtitles.length),
-                currentSubtitles.length - 1
-            );
-            const subtitleEl = document.getElementById('podcast-subtitle');
-            const wrapEl = document.getElementById('podcast-subtitle-wrap');
-            if (!subtitleEl || !wrapEl) return;
-            wrapEl.style.display = 'block';
-            if (subtitleEl.textContent !== currentSubtitles[index]) {
-                if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
-                subtitleEl.style.opacity = '0';
-                subtitleFadeTimeout = setTimeout(() => {
-                    subtitleEl.textContent = currentSubtitles[index];
-                    subtitleEl.style.opacity = '1';
-                    subtitleFadeTimeout = null;
-                }, 600);
-            }
-        }
-        
-        function seekPodcast(event) {
-            if (!podcastAudio) return;
-            const bar = document.getElementById('podcast-progress-bar');
-            const rect = bar.getBoundingClientRect();
-            const percent = (event.clientX - rect.left) / rect.width;
-            podcastAudio.currentTime = percent * podcastAudio.duration;
-        }
-        
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return min + ':' + (sec < 10 ? '0' : '') + sec;
-        }
-        
-        // 分享功能
-        function toggleSharePanel() {
-            const panel = document.getElementById('share-panel');
-            if (panel.style.display === 'none') {
-                panel.style.display = 'block';
-                document.getElementById('share-feedback').style.display = 'none';
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-        
-        function getPodcastShareText() {
-            if (currentPodcastIndex < 0) {
-                return '【九界修真·河一声书】点击收听！';
-            }
-            const t = podcastList[currentPodcastIndex];
-            return '【九界修真·河一声书】' + t.name + '，点击收听！';
-        }
-        
-        function getPodcastShareUrl() {
-            // 分享链接仅指向播客容器，打开后只显示播客内容
-            const base = window.location.href.split('#')[0];
-            return base + '#podcast-player';
-        }
-        
-        function copyPodcastLink() {
-            const shareText = getPodcastShareText() + '\n' + getPodcastShareUrl();
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(shareText).then(() => {
-                    showShareFeedback('✅ 已复制到剪贴板！');
-                }).catch(() => {
-                    fallbackCopy(shareText);
+        // ===== 仅播客模式 =====
+        function initPodcastOnlyMode() {
+            if (window.location.hash === '#podcast-player') {
+                document.querySelectorAll('section').forEach(sec => {
+                    if (!sec.querySelector('#podcast-player')) sec.style.display = 'none';
                 });
-            } else {
-                fallbackCopy(shareText);
+                const nav = document.querySelector('nav');
+                if (nav) nav.style.display = 'none';
+                const bb = document.querySelector('.back-button');
+                if (bb) bb.style.display = 'none';
+                const mn = document.querySelector('.fixed.bottom-0');
+                if (mn) mn.style.display = 'none';
+                const pl = document.getElementById('podcast-player');
+                if (pl && pl.parentElement) { pl.parentElement.style.maxWidth = '700px'; pl.parentElement.style.margin = '20px auto'; pl.parentElement.style.padding = '0 16px'; }
             }
         }
-        
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                showShareFeedback('✅ 已复制到剪贴板！');
-            } catch (err) {
-                showShareFeedback('❌ 复制失败，请手动复制链接');
-            }
-            
-            document.body.removeChild(textarea);
-        }
-        
-        function showShareFeedback(message) {
-            const feedback = document.getElementById('share-feedback');
-            feedback.textContent = message;
-            feedback.style.display = 'block';
-            setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 3000);
-        }
-        
-        function shareToWeChat() {
-            const trackName = currentPodcastIndex >= 0 ? podcastList[currentPodcastIndex].name : '河一有声书';
-            showShareFeedback('💡 请使用浏览器「分享到微信」功能，或复制链接发送给朋友');
-        }
-        
-        function shareToWeibo() {
-            const text = getPodcastShareText();
-            const url = getPodcastShareUrl();
-            const weiboUrl = 'https://service.weibo.com/share/share.php?title=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
-            window.open(weiboUrl, '_blank', 'width=600,height=400');
-        }
-        
-        // ===== 留言区功能 =====
-        
-        // 6条预置留言
-        const presetComments = [
-            { author: '听友001', text: '河一的修炼之路太燃了！每天必听', time: '2分钟前' },
-            { author: '听友002', text: '墟界设定太有意思了，期待后续剧情发展', time: '15分钟前' },
-            { author: '听友003', text: '云希的声音太有磁性了，听不够', time: '1小时前' },
-            { author: '听友004', text: '月妖娆出场那一刻，我直接泪目', time: '2小时前' },
-            { author: '听友005', text: '九界世界观宏大，作者脑洞大开', time: '3小时前' },
-            { author: '听友006', text: '睡前必听，已追更三个月， quality超高', time: '5小时前' }
-        ];
-        
-        // 用户留言数组（初始为空，匿名用户可添加）
-        let userComments = [];
-        
-        // 留言点赞数据：{ "preset_0": { count: 3, liked: false }, "user_1715000000": { count: 1, liked: false } }
-        let commentLikeData = JSON.parse(localStorage.getItem('heyi_comment_likes') || '{}');
-        // 预置留言首次加载时生成随机点赞数（3~99），存到 localStorage
-        presetComments.forEach((c, i) => {
-            const key = 'preset_' + i;
-            if (!commentLikeData[key]) {
-                commentLikeData[key] = { count: Math.floor(Math.random() * 97) + 3, liked: false };
-            }
-        });
-        localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
-        
-        // 渲染留言列表（由下向上自然滚动）
-        let commentScrollTimer = null;
-        let commentScrollIndex = 0;
-        function renderComments() {
-            const viewport = document.getElementById('comment-scroll-container');
-            const container = document.getElementById('comment-scroll-content');
-            if (!viewport || !container) return;
 
-            // 合并预置留言和用户留言，附加唯一key
-            const allComments = [
-                ...presetComments.map((c, i) => ({ ...c, _key: 'preset_' + i })),
-                ...userComments.map(c => ({ ...c, _key: 'user_' + c.id }))
+        // ===== 分享 =====
+        function toggleSharePanel() {
+            const p = document.getElementById('share-panel');
+            const sp = document.getElementById('sleep-panel');
+            if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            if (sp) sp.style.display = 'none';
+        }
+        function copyPodcastLink() {
+            navigator.clipboard.writeText(window.location.href.split('#')[0] + '#podcast-player').then(() => showSleepFeedback('✅ 链接已复制'));
+        }
+        function shareToWeChat() { showSleepFeedback('💬 请截图或复制链接分享到微信'); }
+        function shareToWeibo() { showSleepFeedback('📢 请复制链接分享到微博'); }
+
+        // ============================================================
+        //  3D 卡片轮播
+        // ============================================================
+        class Podcast3DCarousel {
+            constructor(containerId, items) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
+                this.track = this.container.querySelector('.carousel-track-3d');
+                this.items = items || [];
+                this.activeIndex = 0;
+                this.startX = 0;
+                this.isDragging = false;
+                this.render();
+                this.bindEvents();
+                this.updateStyles();
+            }
+            render() {
+                if (!this.track) return;
+                this.track.innerHTML = '';
+                this.items.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'podcast-3d-card';
+                    card.dataset.index = index;
+                    card.innerHTML = `
+                        <div class="podcast-3d-card-glow"></div>
+                        <div class="podcast-3d-card-inner">
+                            <div class="podcast-3d-card-icon">${item.icon || '📖'}</div>
+                            <div class="podcast-3d-card-title">${item.name}</div>
+                            ${index === this.activeIndex ? '<div class="podcast-3d-card-playing">🎧</div>' : ''}
+                        </div>`;
+                    card.addEventListener('click', () => {
+                        if (index !== this.activeIndex) this.goTo(index);
+                    });
+                    this.track.appendChild(card);
+                });
+            }
+            reRender() {
+                const cards = this.container.querySelectorAll('.podcast-3d-card');
+                let need = false;
+                cards.forEach((card, i) => {
+                    if (i === this.activeIndex && !card.querySelector('.podcast-3d-card-playing')) need = true;
+                });
+                if (need) this.render();
+            }
+            bindEvents() {
+                this.container.addEventListener('mousedown', e => { this.startX = e.clientX; this.isDragging = true; });
+                this.container.addEventListener('mousemove', e => this.handleMove(e.clientX));
+                this.container.addEventListener('mouseup', () => this.handleEnd());
+                this.container.addEventListener('mouseleave', () => this.handleEnd());
+                this.container.addEventListener('touchstart', e => { this.startX = e.touches[0].clientX; this.isDragging = true; }, { passive: true });
+                this.container.addEventListener('touchmove', e => this.handleMove(e.touches[0].clientX), { passive: true });
+                this.container.addEventListener('touchend', () => this.handleEnd());
+            }
+            handleMove(clientX) {
+                if (!this.isDragging) return;
+                const diff = this.startX - clientX;
+                if (Math.abs(diff) > 80) {
+                    if (diff > 0) this.next(); else this.prev();
+                    this.isDragging = false;
+                }
+            }
+            handleEnd() { this.isDragging = false; }
+            updateStyles() {
+                const cards = this.container.querySelectorAll('.podcast-3d-card');
+                cards.forEach((card, index) => {
+                    const s = this.getCardStyle(index);
+                    card.style.transform = 'translate(-50%,-50%) translateX(' + s.x + 'px) scale(' + s.scale + ') rotateY(' + s.rotateY + 'deg) translateZ(' + s.z + 'px)';
+                    card.style.opacity = s.opacity;
+                    card.style.zIndex = s.zIndex;
+                    card.classList.toggle('active', index === this.activeIndex);
+                });
+            }
+            getCardStyle(index) {
+                const diff = index - this.activeIndex;
+                const abs = Math.abs(diff);
+                if (abs > 2) return { x: diff > 0 ? 400 : -400, scale: 0.5, z: -300, opacity: 0, rotateY: diff * -20, zIndex: 0 };
+                return { x: diff * 140, scale: Math.max(0.6, 1 - abs * 0.15), z: -abs * 120, opacity: Math.max(0.3, 1 - abs * 0.35), rotateY: diff * -12, zIndex: 10 - abs };
+            }
+            goTo(index) {
+                if (index < 0) index = this.items.length - 1;
+                if (index >= this.items.length) index = 0;
+                this.activeIndex = index;
+                this.updateStyles();
+                if (typeof window.playPodcast === 'function') window.playPodcast(index);
+            }
+            next() { this.goTo(this.activeIndex + 1); }
+            prev() { this.goTo(this.activeIndex - 1); }
+        }
+
+        // ============================================================
+        //  播放计数器（自增模拟）
+        // ============================================================
+        (function() {
+            const STORAGE_KEY_PLAYS = 'heyi_play_count';
+            const STORAGE_KEY_LISTENER = 'heyi_listener_count';
+            let simulated = 50000.00;
+            function updateDisplay() {
+                const le = document.getElementById('listener-count');
+                const pe = document.getElementById('play-count');
+                if (le) le.textContent = (2890 + Math.floor(Math.random() * 100));
+                if (pe) pe.textContent = simulated.toFixed(2);
+            }
+            window.incrementPlayCount = function() {
+                simulated += Math.random() * 0.05;
+                try { localStorage.setItem(STORAGE_KEY_PLAYS, simulated.toFixed(2)); } catch(e) {}
+                updateDisplay();
+            };
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY_PLAYS);
+                if (saved) simulated = parseFloat(saved);
+            } catch(e) {}
+            updateDisplay();
+            setInterval(() => {
+                simulated += Math.random() * 0.01;
+                try { localStorage.setItem(STORAGE_KEY_PLAYS, simulated.toFixed(2)); } catch(e) {}
+                updateDisplay();
+            }, 30000 + Math.random() * 30000);
+            setTimeout(() => {
+                const key = 'heyi_listener_count';
+                let base = 2890;
+                try { base = parseInt(localStorage.getItem(key)) || 2890; } catch(e) {}
+                const newVal = base + Math.round(Math.random() * 99);
+                try { localStorage.setItem(key, newVal); } catch(e) {}
+                updateDisplay();
+            }, 10000 + Math.random() * 10000);
+        })();
+
+        // ============================================================
+        //  留言区（由下向上滚动 + 点赞）
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // ---- 初始化 3D 轮播 ----
+            setTimeout(() => {
+                if (window.podcastList && document.getElementById('carousel-track-3d')) {
+                    window.podcast3DCarousel = new Podcast3DCarousel('carousel-stage-3d', window.podcastList);
+                }
+            }, 100);
+
+            // ---- 进度条点击 ----
+            const pbg = document.getElementById('progressBarBg');
+            if (pbg) {
+                pbg.addEventListener('click', e => {
+                    if (!podcastAudio || !podcastAudio.duration) return;
+                    const rect = pbg.getBoundingClientRect();
+                    podcastAudio.currentTime = ((e.clientX - rect.left) / rect.width) * podcastAudio.duration;
+                });
+            }
+
+            // ---- 播放/暂停按钮 ----
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) playBtn.addEventListener('click', togglePodcast);
+
+            // ---- 上一首/下一首 ----
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            if (prevBtn) prevBtn.addEventListener('click', () => { if (currentPodcastIndex > 0) playPodcast(currentPodcastIndex - 1); });
+            if (nextBtn) nextBtn.addEventListener('click', () => { if (currentPodcastIndex < podcastList.length - 1) playPodcast(currentPodcastIndex + 1); });
+
+            // ---- 初始化仅播客模式 ----
+            initPodcastOnlyMode();
+
+            // ===== 留言区 =====
+            const container = document.getElementById('comment-scroll-container');
+            const viewport = document.getElementById('comment-scroll-content');
+            if (!container || !viewport) return;
+
+            const comments = [
+                { name: '听友_星尘', text: '这集太燃了！河一的成长线写得真好。', likes: Math.floor(Math.random()*50)+3 },
+                { name: '匿名', text: '每天通勤路上都听，已经第三遍了。', likes: Math.floor(Math.random()*50)+3 },
+                { name: '修真爱好者', text: '墟界设定太有意思了，求快更！', likes: Math.floor(Math.random()*50)+3 },
+                { name: '匿名', text: '背景音乐很好听，有没有完整版？', likes: Math.floor(Math.random()*50)+3 },
+                { name: '九界云游客', text: '月妖娆出场那段，鸡皮疙瘩都起来了。', likes: Math.floor(Math.random()*50)+3 },
+                { name: '匿名', text: '作为一个修真小说老读者，这个播客真的一股清流。', likes: Math.floor(Math.random()*50)+3 }
             ];
 
-            if (allComments.length === 0) return;
+            let likeData = {};
+            try { likeData = JSON.parse(localStorage.getItem('heyi_comment_likes')) || {}; } catch(e) {}
 
-            // 清空旧定时器
-            if (commentScrollTimer) clearInterval(commentScrollTimer);
-
-            function buildHTML(list) {
-                return list.map(c => {
-                    const ld = commentLikeData[c._key] || { count: 0, liked: false };
-                    return `
-        <div class="comment-item">
-            <div class="comment-author">${c.author}<span class="comment-time">${c.time}</span></div>
-            <div>${c.text}</div>
-            <button class="comment-like ${ld.liked ? 'liked' : ''}"
-                    data-like-key="${c._key}"
-                    onclick="toggleLike('${c._key}')">
-                💗${ld.count > 0 ? ' ' + ld.count : ''}
-            </button>
-        </div>
-        `;
-                }).join('');
+            function renderComments() {
+                viewport.innerHTML = '';
+                comments.forEach((c, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    const liked = likeData[i] || false;
+                    const displayLikes = c.likes + (liked ? 1 : 0);
+                    div.innerHTML = '<span class="comment-text">' + c.name + '：' + c.text + '</span><span class="comment-like ' + (liked ? 'liked' : '') + '" data-idx="' + i + '">💗 ' + displayLikes + '</span>';
+                    viewport.appendChild(div);
+                    const clone = div.cloneNode(true);
+                    clone.querySelector('.comment-like').addEventListener('click', ev => toggleLike(i, ev));
+                    viewport.appendChild(clone);
+                });
+                viewport.querySelectorAll('.comment-like').forEach(el => {
+                    el.addEventListener('click', ev => toggleLike(parseInt(el.dataset.idx), ev));
+                });
             }
 
-            // ≤5条：直接显示，不滚动
-            if (allComments.length <= 5) {
-                container.innerHTML = buildHTML(allComments);
-                container.style.transition = 'none';
-                container.style.transform = 'translateY(0)';
-                return;
-            }
+            window.toggleLike = function(idx, ev) {
+                const el = ev.target;
+                const isLiked = el.classList.contains('liked');
+                if (isLiked) {
+                    comments[idx].likes = Math.max(0, comments[idx].likes - 1);
+                    el.classList.remove('liked');
+                } else {
+                    comments[idx].likes += 1;
+                    el.classList.add('liked');
+                }
+                likeData[idx] = !isLiked;
+                try { localStorage.setItem('heyi_comment_likes', JSON.stringify(likeData)); } catch(e) {}
+                el.innerHTML = '💗 ' + comments[idx].likes;
+            };
 
-            // >5条：构建[原始 + 复制]，实现无缝循环滚动
-            const displayList = [...allComments, ...allComments];
-            container.innerHTML = buildHTML(displayList);
+            renderComments();
 
-            // 延迟100ms确保浏览器完成布局渲染后再读取尺寸
+            // 滚动逻辑（由下向上，每次5条）
             setTimeout(() => {
-                const firstItem = container.querySelector('.comment-item');
+                const firstItem = viewport.querySelector('.comment-item');
                 if (!firstItem) return;
-
-                const singleHeight = Math.ceil(firstItem.getBoundingClientRect().height);
+                const singleH = Math.ceil(firstItem.getBoundingClientRect().height);
                 const gap = 8;
-                const step = singleHeight + gap;
-
-                // 视口固定显示5条（5条内容 + 4个gap）
-                viewport.style.height = (singleHeight * 5 + gap * 4) + 'px';
-
-                container.style.transition = 'transform 0.5s ease-in-out';
-                container.style.transform = 'translateY(0px)';
-                commentScrollIndex = 0;
-
-                // 滚动函数：每3秒向上滚动一条
-                commentScrollTimer = setInterval(() => {
-                    commentScrollIndex++;
-                    if (commentScrollIndex >= allComments.length) {
-                        // 无缝重置：取消动画瞬间归零，再恢复动画
-                        container.style.transition = 'none';
-                        commentScrollIndex = 0;
-                        container.style.transform = 'translateY(0px)';
-                        container.offsetHeight; // 强制回流
-                        container.style.transition = 'transform 0.5s ease-in-out';
-                    } else {
-                        const offset = -(commentScrollIndex * step);
-                        container.style.transform = 'translateY(' + offset + 'px)';
+                const step = singleH + gap;
+                container.style.height = (singleH * 5 + gap * 4) + 'px';
+                let pos = 0;
+                setInterval(() => {
+                    pos += 1;
+                    if (pos >= step) {
+                        pos = 0;
+                        viewport.appendChild(viewport.querySelector('.comment-item'));
                     }
-                }, 3000);
-            }, 100);
-        }
-
-        // 点赞/取消点赞
-        function toggleLike(key) {
-            if (!commentLikeData[key]) {
-                commentLikeData[key] = { count: 0, liked: false };
-            }
-            if (commentLikeData[key].liked) {
-                commentLikeData[key].count--;
-                commentLikeData[key].liked = false;
-            } else {
-                commentLikeData[key].count++;
-                commentLikeData[key].liked = true;
-            }
-            localStorage.setItem('heyi_comment_likes', JSON.stringify(commentLikeData));
-
-            // 更新所有同名key的按钮（含滚动复制的一份）
-            document.querySelectorAll(`[data-like-key="${key}"]`).forEach(btn => {
-                const d = commentLikeData[key];
-                btn.classList.toggle('liked', d.liked);
-                btn.innerHTML = '💗' + (d.count > 0 ? ' ' + d.count : '');
-            });
-        }
-        
-        // 提交匿名留言
-        function submitComment() {
-            const input = document.getElementById('comment-input');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            // 生成匿名用户名
-            const anonId = '听友' + String(Math.floor(Math.random() * 900) + 100);
-            
-            // 添加留言
-            userComments.unshift({
-                id: Date.now(),
-                author: anonId,
-                text: text,
-                time: '刚刚'
-            });
-            
-            // 清空输入框
-            input.value = '';
-            
-            // 重新渲染
-            renderComments();
-            
-            // 显示反馈
-            const feedback = document.getElementById('comment-feedback');
-            feedback.textContent = '✅ 留言已发布（匿名）';
-            feedback.style.display = 'block';
-            setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 3000);
-        }
-        
-        // 支持回车提交
-        (function() {
-            const input = document.getElementById('comment-input');
-            if (input) {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') submitComment();
-                });
-            }
-            // 初始渲染留言
-            renderComments();
-        })();
-    </script>
-
-        <!-- 相关剧情板块 -->
-        <section class="story-content fade-in" style="margin-top: 30px; position: relative;">
-            <h2 class="chapter-title" style="font-size: 24px;">相关剧情</h2>
-            
-            <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">与河一相关的剧情线和人物关系</p>
-            
-            <!-- 主线剧情 -->
-            <div class="mb-6">
-                <h3 style="color: #fbbf24; font-weight: bold; font-size: 16px; margin-bottom: 12px;">🎯 主线剧情</h3>
-                <div class="space-y-3">
-                    <div class="p-3 rounded-lg" style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2);">
-                        <p style="color: #ccd6f6; font-size: 14px;"><strong>修真初探</strong> - 河一从凡人开始接触修真，克服无灵根的困难</p>
-                    </div>
-                    <div class="p-3 rounded-lg" style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2);">
-                        <p style="color: #ccd6f6; font-size: 14px;"><strong>兄弟聚义</strong> - 与刘浪浪、张雷生、甘道夫结为兄弟</p>
-                    </div>
-                    <div class="p-3 rounded-lg" style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2);">
-                        <p style="color: #ccd6f6; font-size: 14px;"><strong>界域守护</strong> - 成为界域风水师，守护九界平衡</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 人物关系 -->
-            <div>
-                <h3 style="color: #60a5fa; font-weight: bold; font-size: 16px; margin-bottom: 12px;">👥 关键人物关系</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center gap-3 p-3 rounded-lg" style="background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.2);">
-                        <span style="font-size: 32px;">👤</span>
-                        <div>
-                            <p style="color: #60a5fa; font-weight: bold;">刘浪浪</p>
-                            <p style="color: #8892b0; font-size: 13px;">兄弟，生死之交</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-lg" style="background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.2);">
-                        <span style="font-size: 32px;">💰</span>
-                        <div>
-                            <p style="color: #60a5fa; font-weight: bold;">张雷生</p>
-                            <p style="color: #8892b0; font-size: 13px;">兄弟，商会盟友</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-lg" style="background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.2);">
-                        <span style="font-size: 32px;">⚔️</span>
-                        <div>
-                            <p style="color: #60a5fa; font-weight: bold;">甘道夫</p>
-                            <p style="color: #8892b0; font-size: 13px;">兄弟，道门大佬</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        <!-- 播放计数器（容器内右下角） -->
-        
-        </section>
-    </main>
-
-    <!-- 移动端导航 -->
-    <div class="md:hidden fixed bottom-0 w-full z-50" style="background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.1);">
-        <div class="flex justify-around py-2">
-            <button onclick="window.location.href='index.html#overview'" class="flex flex-col items-center text-xs" style="color: #8892b0;">
-                <span class="text-lg">🏠</span>总览
-            </button>
-            <button onclick="window.location.href='index.html#characters'" class="flex flex-col items-center text-xs" style="color: #8892b0;">
-                <span class="text-lg">👥</span>人物
-            </button>
-            <button onclick="window.location.href='index.html#systems'" class="flex flex-col items-center text-xs" style="color: #8892b0;">
-                <span class="text-lg">⚙️</span>体系
-            </button>
-            <button onclick="window.location.href='index.html#story'" class="flex flex-col items-center text-xs" style="color: #8892b0;">
-                <span class="text-lg">📖</span>故事
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // 滚动动画
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-
-        // 页面加载后的初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initPodcastOnlyMode();  // 检查是否仅播客模式
-            // 触发首次动画
-            setTimeout(() => {
-                document.querySelectorAll('.fade-in').forEach(el => {
-                    if (el.getBoundingClientRect().top < window.innerHeight) {
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0)';
-                    }
-                });
-            }, 100);
-        });
-    </script>
-
-
-
-    <script>
-    // 播放计数器逻辑
-    (function() {
-        const BASE_LISTENERS = 2890;
-        const BASE_PLAYS = 50000.00;
-        const STORAGE_KEY_LISTENER = 'heyi_listener_count';
-        const STORAGE_KEY_PLAYS = 'heyi_play_count';
-        const STORAGE_KEY_VISITED = 'heyi_visited';
-
-        // 初始化听友数（仅首次访问时+1）
-        let listeners = parseInt(localStorage.getItem(STORAGE_KEY_LISTENER)) || 0;
-        if (!localStorage.getItem(STORAGE_KEY_VISITED)) {
-            listeners++;
-            localStorage.setItem(STORAGE_KEY_LISTENER, listeners);
-            localStorage.setItem(STORAGE_KEY_VISITED, 'true');
-        }
-
-        // 初始化播放次数
-        let plays = parseFloat(localStorage.getItem(STORAGE_KEY_PLAYS)) || 0;
-
-        // 更新显示
-        function updateCounterDisplay() {
-            const listenerEl = document.getElementById('listener-count');
-            const playEl = document.getElementById('play-count');
-            if (listenerEl) listenerEl.textContent = BASE_LISTENERS + listeners;
-            if (playEl) playEl.textContent = (BASE_PLAYS + plays).toFixed(2);
-        }
-
-        // 增量播放次数（供 playPodcast 调用）
-        window.incrementPlayCount = function() {
-            plays += 1;
-            localStorage.setItem(STORAGE_KEY_PLAYS, plays);
-            updateCounterDisplay();
-        };
-
-        // 页面加载时显示
-        updateCounterDisplay();
-
-        // 模拟其他用户访问（每30-60秒随机+1听友）
-        setInterval(() => {
-            const simulated = parseInt(localStorage.getItem(STORAGE_KEY_LISTENER)) || 0;
-            localStorage.setItem(STORAGE_KEY_LISTENER, simulated + 1);
-            updateCounterDisplay();
-        }, 30000 + Math.random() * 30000);
-
-        // 模拟其他播放（每10-20秒随机+0.01-0.99）
-        setInterval(() => {
-            const simulated = parseFloat(localStorage.getItem(STORAGE_KEY_PLAYS)) || 0;
-            localStorage.setItem(STORAGE_KEY_PLAYS, simulated + Math.round(Math.random() * 99) / 100);
-            updateCounterDisplay();
-        }, 10000 + Math.random() * 10000);
-    })();
-    </script>
-
-    <script>
-    // ===== 3D卡片轮播 for 播客播放列表 =====
-    class Podcast3DCarousel {
-        constructor(containerId, items) {
-            this.container = document.getElementById(containerId);
-            if (!this.container) return;
-            this.track = this.container.querySelector('.carousel-track-3d');
-            this.items = items || [];
-            this.activeIndex = 0;
-            this.startX = 0;
-            this.isDragging = false;
-            
-            this.render();
-            this.bindEvents();
-            this.updateStyles();
-        }
-        
-        render() {
-            if (!this.track) return;
-            this.track.innerHTML = '';
-            
-            this.items.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'podcast-3d-card';
-                card.dataset.index = index;
-                
-                card.innerHTML = `
-                    <div class="podcast-3d-card-glow"></div>
-                    <div class="podcast-3d-card-inner">
-                        <div class="podcast-3d-card-icon">${item.icon || '📖'}</div>
-                        <div class="podcast-3d-card-title">${item.name}</div>
-                        ${index === this.activeIndex ? '<div class="podcast-3d-card-playing">🎧</div>' : ''}
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => {
-                    if (index !== this.activeIndex) {
-                        this.goTo(index);
-                    }
-                });
-                
-                this.track.appendChild(card);
-            });
-        }
-        
-        reRender() {
-            // Re-render to update playing indicator
-            const cards = this.container.querySelectorAll('.podcast-3d-card');
-            cards.forEach((card, index) => {
-                const playing = card.querySelector('.podcast-3d-card-playing');
-                if (index === this.activeIndex && !playing) {
-                    // Need to re-render to show playing indicator
-                    this.render();
-                    return;
-                }
-            });
-        }
-        
-        bindEvents() {
-            this.container.addEventListener('mousedown', (e) => this.handleStart(e.clientX));
-            this.container.addEventListener('mousemove', (e) => this.handleMove(e.clientX));
-            this.container.addEventListener('mouseup', () => this.handleEnd());
-            this.container.addEventListener('mouseleave', () => this.handleEnd());
-            this.container.addEventListener('touchstart', (e) => this.handleStart(e.touches[0].clientX), { passive: true });
-            this.container.addEventListener('touchmove', (e) => this.handleMove(e.touches[0].clientX), { passive: true });
-            this.container.addEventListener('touchend', () => this.handleEnd());
-        }
-        
-        handleStart(clientX) {
-            this.startX = clientX;
-            this.isDragging = true;
-        }
-        
-        handleMove(clientX) {
-            if (!this.isDragging) return;
-            const diff = this.startX - clientX;
-            if (Math.abs(diff) > 80) {
-                if (diff > 0) {
-                    this.next();
-                } else {
-                    this.prev();
-                }
-                this.isDragging = false;
-            }
-        }
-        
-        handleEnd() {
-            this.isDragging = false;
-        }
-        
-        updateStyles() {
-            const cards = this.container.querySelectorAll('.podcast-3d-card');
-            cards.forEach((card, index) => {
-                const style = this.getCardStyle(index);
-                card.style.transform = `translate(-50%, -50%) translateX(${style.x}px) scale(${style.scale}) rotateY(${style.rotateY}deg) translateZ(${style.z}px)`;
-                card.style.opacity = style.opacity;
-                card.style.zIndex = style.zIndex;
-                
-                if (index === this.activeIndex) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-        }
-        
-        getCardStyle(index) {
-            const diff = index - this.activeIndex;
-            const absDistance = Math.abs(diff);
-            
-            if (absDistance > 2) {
-                return {
-                    x: diff > 0 ? 400 : -400,
-                    scale: 0.5,
-                    z: -300,
-                    opacity: 0,
-                    rotateY: diff * -20,
-                    zIndex: 0
-                };
-            }
-            
-            return {
-                x: diff * 140,
-                scale: Math.max(0.6, 1 - absDistance * 0.15),
-                z: -absDistance * 120,
-                opacity: Math.max(0.3, 1 - absDistance * 0.35),
-                rotateY: diff * -12,
-                zIndex: 10 - absDistance
-            };
-        }
-        
-        goTo(index) {
-            if (index < 0) index = this.items.length - 1;
-            if (index >= this.items.length) index = 0;
-            
-            this.activeIndex = index;
-            this.updateStyles();
-            
-            // Play the podcast
-            if (typeof window.playPodcast === 'function') {
-                window.playPodcast(index);
-            }
-        }
-        
-        next() {
-            this.goTo(this.activeIndex + 1);
-        }
-        
-        prev() {
-            this.goTo(this.activeIndex - 1);
-        }
-    }
-    
-    // 初始化3D轮播（DOM元素已存在，直接初始化）
-    if (window.podcastList && document.getElementById('carousel-track-3d')) {
-        window.podcast3DCarousel = new Podcast3DCarousel('carousel-stage-3d', window.podcastList);
-    }
-    
-        
-        // ===== 3D轮播功能 =====
-        let carouselActiveIndex = 0;
-        let isDragging = false;
-        let startX = 0;
-
-        // 渲染专辑卡片
-        function renderAlbumCards() {
-            const track = document.getElementById('carouselTrack');
-            if (!track) return;
-            track.innerHTML = '';
-            
-            podcastList.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'album-card';
-                card.dataset.index = index;
-                
-                card.innerHTML = `
-                    <div class="album-cover-wrapper">
-                        <img src="assets/images/河一.png" alt="${item.name}" class="album-cover" draggable="false"
-                             onerror="this.style.display='none'; this.parentElement.innerHTML='🎧';">
-                        <div class="album-info-glass">
-                            <p class="album-title">${item.name}</p>
-                            <p class="album-artist">九界修真</p>
-                        </div>
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => {
-                    if (index !== carouselActiveIndex) {
-                        goTo(index);
-                    }
-                });
-                
-                track.appendChild(card);
-            });
-            
-            updateCardStyles();
-        }
-
-        // 更新卡片3D样式
-        function updateCardStyles() {
-            const cards = document.querySelectorAll('.album-card');
-            cards.forEach((card, index) => {
-                const style = getCardStyle(index);
-                card.style.transform = `translate(-50%, -50%) translateX(${style.x}px) scale(${style.scale}) rotateY(${style.rotateY}deg) translateZ(${style.z}px)`;
-                card.style.opacity = style.opacity;
-                card.style.zIndex = style.zIndex;
-            });
-        }
-
-        // 计算每张卡片的3D位置
-        function getCardStyle(index) {
-            const diff = index - carouselActiveIndex;
-            const absDistance = Math.abs(diff);
-            
-            if (absDistance > 2) {
-                return {
-                    x: diff > 0 ? 400 : -400,
-                    scale: 0.5,
-                    z: -300,
-                    opacity: 0,
-                    rotateY: diff * -20,
-                    zIndex: 0
-                };
-            }
-            
-            return {
-                x: diff * 140,
-                scale: Math.max(0.6, 1 - absDistance * 0.15),
-                z: -absDistance * 120,
-                opacity: Math.max(0.3, 1 - absDistance * 0.35),
-                rotateY: diff * -12,
-                zIndex: 10 - absDistance
-            };
-        }
-
-        // 跳转到指定曲目
-        function goTo(index) {
-            if (index < 0) index = podcastList.length - 1;
-            if (index >= podcastList.length) index = 0;
-            
-            carouselActiveIndex = index;
-            updateCardStyles();
-            playPodcast(index);
-        }
-
-        // 更新歌曲信息显示
-        function updateSongInfoDisplay() {
-            const item = podcastList[carouselActiveIndex];
-            if (!item) return;
-            
-            const songTitle = document.getElementById('songTitle');
-            const songArtist = document.getElementById('songArtist');
-            const miniTitle = document.getElementById('miniTitle');
-            const miniArtist = document.getElementById('miniArtist');
-            const miniCover = document.getElementById('miniCover');
-            
-            if (songTitle) {
-                songTitle.textContent = item.name;
-                songTitle.classList.remove('fade-in');
-                songTitle.classList.add('fade-out');
-                setTimeout(() => {
-                    songTitle.classList.remove('fade-out');
-                    songTitle.classList.add('fade-in');
+                    viewport.style.transform = 'translateY(-' + pos + 'px)';
                 }, 50);
-            }
-            if (songArtist) songArtist.textContent = '九界修真';
-            if (miniTitle) miniTitle.textContent = item.name;
-            if (miniArtist) miniArtist.textContent = '九界修真';
-            if (miniCover) miniCover.src = 'assets/images/河一.png';
-        }
-
-        // 覆盖 prevPodcast 和 nextPodcast 使其同步3D轮播
-        window.prevPodcast = function() { goTo(carouselActiveIndex - 1); };
-        window.nextPodcast = function() { goTo(carouselActiveIndex + 1); };
-
-        // 拖动交互
-        document.addEventListener('DOMContentLoaded', () => {
-            renderAlbumCards();
-            
-            const stage = document.getElementById('carouselStage');
-            if (stage) {
-                stage.addEventListener('mousedown', (e) => {
-                    startX = e.clientX;
-                    isDragging = true;
-                });
-                stage.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    const diff = startX - e.clientX;
-                    if (Math.abs(diff) > 80) {
-                        if (diff > 0) goTo(carouselActiveIndex + 1);
-                        else goTo(carouselActiveIndex - 1);
-                        isDragging = false;
-                    }
-                });
-                stage.addEventListener('mouseup', () => isDragging = false);
-                stage.addEventListener('mouseleave', () => isDragging = false);
-                
-                // Touch events
-                stage.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    isDragging = true;
-                });
-                stage.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    const diff = startX - e.touches[0].clientX;
-                    if (Math.abs(diff) > 80) {
-                        if (diff > 0) goTo(carouselActiveIndex + 1);
-                        else goTo(carouselActiveIndex - 1);
-                        isDragging = false;
-                    }
-                });
-                stage.addEventListener('touchend', () => isDragging = false);
-            }
+            }, 100);
         });
-        
-</script>
+        </script>
+
     
 </body>
 </html>
