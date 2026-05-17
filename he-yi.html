@@ -1476,6 +1476,8 @@
             // >5条：构建[原始 + 复制]，实现无缝循环滚动
             const displayList = [...allComments, ...allComments];
             container.innerHTML = buildHTML(displayList);
+            // 强制回流，确保浏览器已完成布局，使offsetHeight读取准确
+            container.offsetHeight;
             container.style.transition = 'transform 0.5s ease-in-out';
 
             // 动态计算单条高度（含gap）
