@@ -1001,7 +1001,6 @@
             { name: '《九界归尘》第十四章：残魂渡', file: 'assets/music/第十四章：残魂渡.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十四章-残魂渡.txt' },
             { name: '《九界归尘》第十五章：墟界深处', file: 'assets/music/第十五章：墟界深处.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十五章-墟界深处.txt' }
         ];
-        window.podcastList = podcastList;
         
         let currentPodcastIndex = -1;
         let isPodcastPlaying = false;
@@ -1092,45 +1091,69 @@
             
             // 播放新曲目
             currentPodcastIndex = index;
+            // 同步3D轮播
+            if (window.podcast3DCarousel && window.podcast3DCarousel.activeIndex !== index) {
+                window.podcast3DCarousel.activeIndex = index;
+                window.podcast3DCarousel.updateStyles();
+                if (window.podcast3DCarousel.reRender) window.podcast3DCarousel.reRender();
+            }
             const track = podcastList[index];
             podcastAudio = new Audio(track.file);
-            
             // 加载外部字幕文件
             if (track.subtitleFile) loadSubtitleFile(track.subtitleFile);
             
-            // 更新歌曲信息显示
-            
             // 更新UI
-            document.getElementById('playBtn').textContent = '⏸️';
-            isPodcastPlaying = true;
+            document.getElementById('podcast-title').textContent = track.name;
+            document.getElementById('podcast-desc').textContent = '点击曲目开始聆听';
+            const copyrightEl = document.getElementById('podcast-copyright');
+            if (copyrightEl) copyrightEl.style.display = 'block';
+            const subtitleWrap = document.getElementById('podcast-subtitle-wrap');
+            if (subtitleWrap) subtitleWrap.style.display = 'block';
+            
+            // 更新播放列表高亮
+            document.querySelectorAll('.podcast-track').forEach((el, i) => {
+                if (i === index) {
+                    el.style.background = 'rgba(100, 255, 218, 0.08)';
+                    el.style.borderColor = 'rgba(100, 255, 218, 0.2)';
+                    el.querySelector('.track-name').style.color = '#64ffda';
+                } else {
+                    el.style.background = 'rgba(255, 255, 255, 0.03)';
+                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    el.querySelector('.track-name').style.color = '#e0e0e0';
+                }
+            });
             
             // 播放
-            podcastAudio.playbackRate = podcastPlaybackRate;
+            podcastAudio.playbackRate = podcastPlaybackRate;  // 应用语速
             podcastAudio.play();
-            
             // 增量播放计数
             if (window.incrementPlayCount) window.incrementPlayCount();
+            isPodcastPlaying = true;
+            document.getElementById('podcast-play-btn').textContent = '⏸️';
+            
+            // 启动黑胶唱片旋转动画
+            // document.getElementById('podcast-cover').style.animationPlayState = 'running';
             
             // 自动播放背景音乐（强制2%音量，受BGM开关控制）
             if (isBgMusicEnabled) {
                 initBgMusic();
-                bgMusic.volume = 0.02;
+                bgMusic.volume = 0.02;  // 强制2%音量，任何终端都不超过
                 bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
             }
             
             // 更新进度条
             podcastAudio.addEventListener('timeupdate', updatePodcastProgress);
             podcastAudio.addEventListener('loadedmetadata', () => {
-                document.getElementById('totalTime').textContent = formatTime(podcastAudio.duration);
-                updateSubtitle(0);
+                document.getElementById('podcast-duration').textContent = formatTime(podcastAudio.duration);
+                updateSubtitle(0); // 初始化字幕
             });
-            
             podcastAudio.addEventListener('ended', () => {
                 // 集数计数器+1
                 playedEpisodesCount++;
                 
                 // 检查定时关闭条件
                 if (sleepTimerMode === 'endOfTrack') {
+                    // 播完本集后关闭
                     executeSleepTimer();
                     return;
                 }
@@ -1145,39 +1168,43 @@
                 } else {
                     // 播放列表结束
                     isPodcastPlaying = false;
-                    document.getElementById('playBtn').textContent = '▶️';
+                    document.getElementById('podcast-play-btn').textContent = '▶️';
                     if (bgMusic) bgMusic.pause();
-                    
+                    // 暂停黑胶唱片旋转动画
+                    // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
                     // 隐藏字幕
                     if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
-                    const wrapEl = document.getElementById('subtitle-wrap');
+                    const wrapEl = document.getElementById('podcast-subtitle-wrap');
                     if (wrapEl) wrapEl.style.display = 'none';
-                    const subtitleEl = document.getElementById('subtitle');
+                    const subtitleEl = document.getElementById('podcast-subtitle');
                     if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
                 }
             });
+            
+            // 应用定时模式（afterDuration 需要设置 setTimeout）
+            // 注意：applySleepTimer() 已在 setSleepTimer() 中调用，此处不需要重复调用
         }
         
-                function togglePodcast() {
+        function togglePodcast() {
             if (currentPodcastIndex === -1) {
                 playPodcast(0);
                 return;
             }
-            const subtitleEl = document.getElementById('subtitle');
+            const subtitleEl = document.getElementById('podcast-subtitle');
             if (isPodcastPlaying) {
                 podcastAudio.pause();
                 isPodcastPlaying = false;
-                document.getElementById('playBtn').textContent = '▶️';
+                document.getElementById('podcast-play-btn').textContent = '▶️';
                 if (bgMusic) bgMusic.pause();
-                // null // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
+                // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
                 if (subtitleEl) subtitleEl.style.animationPlayState = 'paused';
             } else {
                 podcastAudio.playbackRate = podcastPlaybackRate;
                 podcastAudio.play();
                 isPodcastPlaying = true;
-                document.getElementById('playBtn').textContent = '⏸️';
+                document.getElementById('podcast-play-btn').textContent = '⏸️';
                 if (bgMusic && isBgMusicEnabled) bgMusic.play().catch(e => {});
-                // null // document.getElementById('podcast-cover').style.animationPlayState = 'running';
+                // document.getElementById('podcast-cover').style.animationPlayState = 'running';
                 if (subtitleEl) subtitleEl.style.animationPlayState = 'running';
             }
         }
@@ -1269,15 +1296,15 @@
                 podcastAudio.currentTime = 0;
             }
             isPodcastPlaying = false;
-            document.getElementById('playBtn').textContent = '▶️';
+            document.getElementById('podcast-play-btn').textContent = '▶️';
             if (bgMusic) bgMusic.pause();
-            // null // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
+            // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
             
             // 隐藏字幕
             if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
-            const wrapEl = document.getElementById('subtitle-wrap');
+            const wrapEl = document.getElementById('podcast-subtitle-wrap');
             if (wrapEl) wrapEl.style.display = 'none';
-            const subtitleEl = document.getElementById('subtitle');
+            const subtitleEl = document.getElementById('podcast-subtitle');
             if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
             
             // 重置定时状态
@@ -1388,8 +1415,8 @@
                 Math.floor((currentTime / duration) * currentSubtitles.length),
                 currentSubtitles.length - 1
             );
-            const subtitleEl = document.getElementById('subtitle');
-            const wrapEl = document.getElementById('subtitle-wrap');
+            const subtitleEl = document.getElementById('podcast-subtitle');
+            const wrapEl = document.getElementById('podcast-subtitle-wrap');
             if (!subtitleEl || !wrapEl) return;
             wrapEl.style.display = 'block';
             if (subtitleEl.textContent !== currentSubtitles[index]) {
@@ -1994,6 +2021,163 @@
     if (window.podcastList && document.getElementById('carousel-track-3d')) {
         window.podcast3DCarousel = new Podcast3DCarousel('carousel-stage-3d', window.podcastList);
     }
+    
+        
+        // ===== 3D轮播功能 =====
+        let carouselActiveIndex = 0;
+        let isDragging = false;
+        let startX = 0;
+
+        // 渲染专辑卡片
+        function renderAlbumCards() {
+            const track = document.getElementById('carouselTrack');
+            if (!track) return;
+            track.innerHTML = '';
+            
+            podcastList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.dataset.index = index;
+                
+                card.innerHTML = `
+                    <div class="album-cover-wrapper">
+                        <img src="assets/images/河一.png" alt="${item.name}" class="album-cover" draggable="false"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='🎧';">
+                        <div class="album-info-glass">
+                            <p class="album-title">${item.name}</p>
+                            <p class="album-artist">九界修真</p>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    if (index !== carouselActiveIndex) {
+                        goTo(index);
+                    }
+                });
+                
+                track.appendChild(card);
+            });
+            
+            updateCardStyles();
+        }
+
+        // 更新卡片3D样式
+        function updateCardStyles() {
+            const cards = document.querySelectorAll('.album-card');
+            cards.forEach((card, index) => {
+                const style = getCardStyle(index);
+                card.style.transform = `translate(-50%, -50%) translateX(${style.x}px) scale(${style.scale}) rotateY(${style.rotateY}deg) translateZ(${style.z}px)`;
+                card.style.opacity = style.opacity;
+                card.style.zIndex = style.zIndex;
+            });
+        }
+
+        // 计算每张卡片的3D位置
+        function getCardStyle(index) {
+            const diff = index - carouselActiveIndex;
+            const absDistance = Math.abs(diff);
+            
+            if (absDistance > 2) {
+                return {
+                    x: diff > 0 ? 400 : -400,
+                    scale: 0.5,
+                    z: -300,
+                    opacity: 0,
+                    rotateY: diff * -20,
+                    zIndex: 0
+                };
+            }
+            
+            return {
+                x: diff * 140,
+                scale: Math.max(0.6, 1 - absDistance * 0.15),
+                z: -absDistance * 120,
+                opacity: Math.max(0.3, 1 - absDistance * 0.35),
+                rotateY: diff * -12,
+                zIndex: 10 - absDistance
+            };
+        }
+
+        // 跳转到指定曲目
+        function goTo(index) {
+            if (index < 0) index = podcastList.length - 1;
+            if (index >= podcastList.length) index = 0;
+            
+            carouselActiveIndex = index;
+            updateCardStyles();
+            playPodcast(index);
+        }
+
+        // 更新歌曲信息显示
+        function updateSongInfoDisplay() {
+            const item = podcastList[carouselActiveIndex];
+            if (!item) return;
+            
+            const songTitle = document.getElementById('songTitle');
+            const songArtist = document.getElementById('songArtist');
+            const miniTitle = document.getElementById('miniTitle');
+            const miniArtist = document.getElementById('miniArtist');
+            const miniCover = document.getElementById('miniCover');
+            
+            if (songTitle) {
+                songTitle.textContent = item.name;
+                songTitle.classList.remove('fade-in');
+                songTitle.classList.add('fade-out');
+                setTimeout(() => {
+                    songTitle.classList.remove('fade-out');
+                    songTitle.classList.add('fade-in');
+                }, 50);
+            }
+            if (songArtist) songArtist.textContent = '九界修真';
+            if (miniTitle) miniTitle.textContent = item.name;
+            if (miniArtist) miniArtist.textContent = '九界修真';
+            if (miniCover) miniCover.src = 'assets/images/河一.png';
+        }
+
+        // 覆盖 prevPodcast 和 nextPodcast 使其同步3D轮播
+        window.prevPodcast = function() { goTo(carouselActiveIndex - 1); };
+        window.nextPodcast = function() { goTo(carouselActiveIndex + 1); };
+
+        // 拖动交互
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAlbumCards();
+            
+            const stage = document.getElementById('carouselStage');
+            if (stage) {
+                stage.addEventListener('mousedown', (e) => {
+                    startX = e.clientX;
+                    isDragging = true;
+                });
+                stage.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const diff = startX - e.clientX;
+                    if (Math.abs(diff) > 80) {
+                        if (diff > 0) goTo(carouselActiveIndex + 1);
+                        else goTo(carouselActiveIndex - 1);
+                        isDragging = false;
+                    }
+                });
+                stage.addEventListener('mouseup', () => isDragging = false);
+                stage.addEventListener('mouseleave', () => isDragging = false);
+                
+                // Touch events
+                stage.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    isDragging = true;
+                });
+                stage.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    const diff = startX - e.touches[0].clientX;
+                    if (Math.abs(diff) > 80) {
+                        if (diff > 0) goTo(carouselActiveIndex + 1);
+                        else goTo(carouselActiveIndex - 1);
+                        isDragging = false;
+                    }
+                });
+                stage.addEventListener('touchend', () => isDragging = false);
+            }
+        });
         
 </script>
     
