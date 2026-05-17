@@ -1091,53 +1091,30 @@
             
             // 播放新曲目
             currentPodcastIndex = index;
-            // 同步3D轮播
-            if (window.podcast3DCarousel && window.podcast3DCarousel.activeIndex !== index) {
-                window.podcast3DCarousel.activeIndex = index;
-                window.podcast3DCarousel.updateStyles();
-                if (window.podcast3DCarousel.reRender) window.podcast3DCarousel.reRender();
-            }
             const track = podcastList[index];
             podcastAudio = new Audio(track.file);
+            
             // 加载外部字幕文件
             if (track.subtitleFile) loadSubtitleFile(track.subtitleFile);
             
-            // 更新UI
-            document.getElementById('songTitle').textContent = track.name;
-            document.getElementById('songArtist').textContent = '点击曲目开始聆听';
-            const copyrightEl = null // document.getElementById('podcast-copyright');
-            if (copyrightEl) copyrightEl.style.display = 'block';
-            const subtitleWrap = document.getElementById('subtitle-wrap');
-            if (subtitleWrap) subtitleWrap.style.display = 'block';
+            // 更新歌曲信息显示
+            updateSongInfoDisplay();
             
-            // 更新播放列表高亮
-            document.querySelectorAll('.podcast-track').forEach((el, i) => {
-                if (i === index) {
-                    el.style.background = 'rgba(100, 255, 218, 0.08)';
-                    el.style.borderColor = 'rgba(100, 255, 218, 0.2)';
-                    el.querySelector('.track-name').style.color = '#64ffda';
-                } else {
-                    el.style.background = 'rgba(255, 255, 255, 0.03)';
-                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    el.querySelector('.track-name').style.color = '#e0e0e0';
-                }
-            });
+            // 更新UI
+            document.getElementById('playBtn').textContent = '⏸️';
+            isPodcastPlaying = true;
             
             // 播放
-            podcastAudio.playbackRate = podcastPlaybackRate;  // 应用语速
+            podcastAudio.playbackRate = podcastPlaybackRate;
             podcastAudio.play();
+            
             // 增量播放计数
             if (window.incrementPlayCount) window.incrementPlayCount();
-            isPodcastPlaying = true;
-            document.getElementById('playBtn').textContent = '⏸️';
-            
-            // 启动黑胶唱片旋转动画
-            // null // document.getElementById('podcast-cover').style.animationPlayState = 'running';
             
             // 自动播放背景音乐（强制2%音量，受BGM开关控制）
             if (isBgMusicEnabled) {
                 initBgMusic();
-                bgMusic.volume = 0.02;  // 强制2%音量，任何终端都不超过
+                bgMusic.volume = 0.02;
                 bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
             }
             
@@ -1145,15 +1122,15 @@
             podcastAudio.addEventListener('timeupdate', updatePodcastProgress);
             podcastAudio.addEventListener('loadedmetadata', () => {
                 document.getElementById('totalTime').textContent = formatTime(podcastAudio.duration);
-                updateSubtitle(0); // 初始化字幕
+                updateSubtitle(0);
             });
+            
             podcastAudio.addEventListener('ended', () => {
                 // 集数计数器+1
                 playedEpisodesCount++;
                 
                 // 检查定时关闭条件
                 if (sleepTimerMode === 'endOfTrack') {
-                    // 播完本集后关闭
                     executeSleepTimer();
                     return;
                 }
@@ -1170,8 +1147,7 @@
                     isPodcastPlaying = false;
                     document.getElementById('playBtn').textContent = '▶️';
                     if (bgMusic) bgMusic.pause();
-                    // 暂停黑胶唱片旋转动画
-                    // null // document.getElementById('podcast-cover').style.animationPlayState = 'paused';
+                    
                     // 隐藏字幕
                     if (subtitleFadeTimeout) clearTimeout(subtitleFadeTimeout);
                     const wrapEl = document.getElementById('subtitle-wrap');
@@ -1180,12 +1156,9 @@
                     if (subtitleEl) { subtitleEl.style.opacity = '0'; subtitleEl.textContent = ''; }
                 }
             });
-            
-            // 应用定时模式（afterDuration 需要设置 setTimeout）
-            // 注意：applySleepTimer() 已在 setSleepTimer() 中调用，此处不需要重复调用
         }
         
-        function togglePodcast() {
+                function togglePodcast() {
             if (currentPodcastIndex === -1) {
                 playPodcast(0);
                 return;
