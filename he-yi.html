@@ -211,6 +211,319 @@
             color: #6b7280;
             font-size: 10px;
         }
+
+        /* ========== 3D卡片轮播样式 ========== */
+        .carousel-stage-3d {
+            position: relative;
+            width: 320px;
+            height: 400px;
+            margin: 20px auto;
+            cursor: grab;
+            perspective: 1200px;
+        }
+
+        .carousel-stage-3d:active {
+            cursor: grabbing;
+        }
+
+        .carousel-track-3d {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .podcast-3d-card {
+            position: absolute;
+            width: 220px;
+            height: 300px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        opacity 0.5s ease,
+                        z-index 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .podcast-3d-card:hover {
+            transform: translate(-50%, -50%) scale(1.05) !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .podcast-3d-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.08), rgba(167, 139, 250, 0.08));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background 0.3s ease;
+        }
+
+        .podcast-3d-card.active .podcast-3d-card-inner {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.15), rgba(167, 139, 250, 0.15));
+            border-color: rgba(100, 255, 218, 0.4);
+        }
+
+        .podcast-3d-card-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 8px rgba(100, 255, 218, 0.3));
+        }
+
+        .podcast-3d-card-title {
+            color: #e0e0e0;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.4;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .podcast-3d-card.active .podcast-3d-card-title {
+            color: #64ffda;
+        }
+
+        .podcast-3d-card-playing {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 16px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .podcast-3d-card-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(100, 255, 218, 0.08) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .podcast-3d-card.active .podcast-3d-card-glow {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .carousel-stage-3d {
+                width: 260px;
+                height: 340px;
+            }
+
+            .podcast-3d-card {
+                width: 170px;
+                height: 240px;
+            }
+        }
+
+        /* 3D轮播播放器样式 */
+        .carousel-stage {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 20px auto;
+            cursor: grab;
+            perspective: 1200px;
+        }
+        .carousel-stage:active { cursor: grabbing; }
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .album-card {
+            position: absolute;
+            width: 240px;
+            height: 340px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        opacity 0.5s ease, 
+                        z-index 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .album-card:hover {
+            transform: translate(-50%, -50%) scale(1.05) !important;
+        }
+        .album-cover-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: box-shadow 0.3s ease;
+        }
+        .album-card:hover .album-cover-wrapper {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        .album-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .album-info-glass {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            backdrop-filter: blur(5px);
+        }
+        .album-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .album-artist {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .song-info-section {
+            width: 100%;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .song-info-text {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .song-title {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .song-artist {
+            margin: 8px 0 0;
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .progress-section {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .progress-bar-bg {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(to right, #3B82F6, #10B981);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        .progress-time {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+        .player-controls {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .controls-glass {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .controls-center {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #3B82F6, #10B981);
+        }
+        .play-btn:hover {
+            background: linear-gradient(45deg, #2563EB, #059669);
+            transform: scale(1.1);
+        }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        .fade-out { animation: fadeOut 0.3s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
     </style>
 </head>
 <body class="text-gray-200">
@@ -539,62 +852,82 @@
             <p style="text-align: center; color: #8892b0; margin-bottom: 30px;">点击曲目即可播放</p>
             
             <!-- 播放器容器 -->
-            <div id="podcast-player" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 0.5px solid rgba(255, 255, 255, 0.18); border-radius: 32px; padding: 32px; position: relative;">
-                
-                <!-- 当前播放信息 -->
-                <div class="flex items-center gap-4 mb-6">
-                    <div id="podcast-cover" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #64ffda, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden; animation: vinylRotate 3s linear infinite; animation-play-state: paused; box-shadow: 0 0 25px rgba(100, 255, 218, 0.4), 0 0 50px rgba(167, 139, 250, 0.2); border: 3px solid rgba(255, 255, 255, 0.2);">
-                        <img src="assets/images/河一.png" alt="河一" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='🎙️';">
-                    </div>
-                    <div class="flex-1">
-                        <h3 id="podcast-title" style="color: #e0e0e0; font-size: 16px; font-weight: bold; margin-bottom: 4px;">选择曲目开始播放</h3>
-                        <div id="podcast-copyright" style="display: none; text-align: center; margin-bottom: 8px;">
-                            <p style="color: #ffffff; font-family: 'FangSong', 'STFangsong', '仿宋', serif; font-size: 12px; margin-bottom: 2px;">版权© 2026 DSArt+AI STUDIO</p>
-                            <p style="color: #8892b0; font-size: 11px;">联系作者 WeChat: SAGEBOOK</p>
-                        </div>
-                        <p id="podcast-desc" style="color: #8892b0; font-size: 13px;">点击曲目开始聆听</p>
-                        <div id="podcast-subtitle-wrap" style="display: none; margin-top: 8px; height: 24px; overflow: hidden; position: relative;">
-                            <p id="podcast-subtitle" style="color: #64ffda; font-size: 14px; text-align: center; opacity: 0;"></p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2" style="flex-shrink: 0;">
-                        <button id="bgm-toggle-btn" onclick="toggleBgm()" style="background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="背景音乐开关">🔊</button>
-                        <button onclick="toggleSharePanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;" title="分享">🔗</button>
-                        <button id="sleep-timer-btn" onclick="toggleSleepPanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;" title="定时关闭">⏱️</button>
+            <!-- 3D播放器容器 -->
+            <div id="podcast-player" style="max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box; position: relative;">
+            
+                <!-- 3D轮播舞台 -->
+                <div class="carousel-stage-3d" id="carousel-stage-3d" style="position: relative; width: 300px; height: 400px; margin: 20px auto; cursor: grab; perspective: 1200px;">
+                    <div class="carousel-track-3d" id="carousel-track-3d" style="position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                        <!-- 专辑卡片由JS动态生成 -->
                     </div>
                 </div>
-                
+            
+                <!-- 歌曲信息 -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <div id="songInfoText" style="transition: opacity 0.3s ease, transform 0.3s ease;">
+                        <h2 id="songTitle" style="margin: 0; font-size: 28px; font-weight: 700; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">选择曲目</h2>
+                        <p id="songArtist" style="margin: 8px 0 0; font-size: 18px; color: rgba(255,255,255,0.8); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">九界归尘</p>
+                    </div>
+                    
+                    <!-- 进度条 -->
+                    <div style="width: 100%; margin-top: 20px;">
+                        <div id="progressBarBg" style="position: relative; width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; cursor: pointer;">
+                            <div id="progressBarFill" style="position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(to right, #3B82F6, #10B981); border-radius: 2px; transition: width 0.3s ease; width: 0%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.6);">
+                            <span id="currentTime">0:00</span>
+                            <span id="totalTime">0:00</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- 播放控制 -->
+                <div style="width: 100%; margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <button id="prevBtn" style="display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="Previous">⏮</button>
+                            <button id="playBtn" style="display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(45deg, #3B82F6, #10B981); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="Play">▶️</button>
+                            <button id="nextBtn" style="display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="Next">⏭</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img id="miniCover" src="assets/images/河一.png" alt="" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                            <div style="display: flex; flex-direction: column; justify-content: center;">
+                                <p id="miniTitle" style="margin: 0; font-size: 14px; font-weight: 600; color: white;">选择曲目</p>
+                                <p id="miniArtist" style="margin: 2px 0 0; font-size: 12px; color: rgba(255,255,255,0.7);">九界归尘</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button id="bgmToggleBtn" onclick="toggleBgm()" style="display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="BGM">🔊</button>
+                            <button onclick="toggleSharePanel()" style="display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="Share">🔗</button>
+                            <button id="sleepTimerBtn" onclick="toggleSleepPanel()" style="display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; transition: all 0.2s ease;" aria-label="Timer">⏱️</button>
+                        </div>
+                    </div>
+                </div>
+            
                 <!-- 分享面板 -->
-                <div id="share-panel" style="display: none; background: rgba(26, 26, 46, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 16px; position: relative;">
+                <div id="share-panel" style="display: none; background: rgba(26,26,46,0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px; margin-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <h4 style="color: #e0e0e0; font-size: 14px; font-weight: bold;">分享播客</h4>
                         <button onclick="toggleSharePanel()" style="background: none; border: none; color: #8892b0; cursor: pointer; font-size: 20px;">×</button>
                     </div>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button onclick="copyPodcastLink()" style="flex: 1; min-width: 120px; background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            <span>📋</span> 复制链接
-                        </button>
-                        <button onclick="shareToWeChat()" style="flex: 1; min-width: 120px; background: rgba(7, 193, 96, 0.1); border: 1px solid rgba(7, 193, 96, 0.3); color: #07c160; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            <span>💬</span> 微信
-                        </button>
-                        <button onclick="shareToWeibo()" style="flex: 1; min-width: 120px; background: rgba(230, 22, 45, 0.1); border: 1px solid rgba(230, 22, 45, 0.3); color: #e6162d; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            <span>📢</span> 微博
-                        </button>
+                        <button onclick="copyPodcastLink()" style="flex: 1; min-width: 120px; background: rgba(100,255,218,0.1); border: 1px solid rgba(100,255,218,0.3); color: #64ffda; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px;">📋 复制链接</button>
+                        <button onclick="shareToWeChat()" style="flex: 1; min-width: 120px; background: rgba(7,193,96,0.1); border: 1px solid rgba(7,193,96,0.3); color: #07c160; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px;">💬 微信</button>
+                        <button onclick="shareToWeibo()" style="flex: 1; min-width: 120px; background: rgba(230,22,45,0.1); border: 1px solid rgba(230,22,45,0.3); color: #e6162d; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px;">📢 微博</button>
                     </div>
-                    <div id="share-feedback" style="display: none; margin-top: 12px; text-align: center; color: #64ffda; font-size: 13px; padding: 8px; background: rgba(100, 255, 218, 0.05); border-radius: 8px;"></div>
                 </div>
                 
                 <!-- 定时关闭面板 -->
-                <div id="sleep-panel" style="display: none; background: rgba(26, 26, 46, 0.95); border:1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 16px; position: relative;">
+                <div id="sleep-panel" style="display: none; background: rgba(26,26,46,0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px; margin-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <h4 style="color: #e0e0e0; font-size: 14px; font-weight: bold;">⏱️ 定时关闭</h4>
                         <button onclick="toggleSleepPanel()" style="background: none; border: none; color: #8892b0; cursor: pointer; font-size: 20px;">×</button>
                     </div>
-                    <div class="space-y-2" style="display: flex; flex-direction: column; gap: 8px;">
-                        <button onclick="setSleepTimer('off')" class="sleep-option" data-mode="off" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">关闭定时</button>
-                        <button onclick="setSleepTimer('endOfTrack')" class="sleep-option" data-mode="endOfTrack" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">播完本集后关闭</button>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button onclick="setSleepTimer('off')" class="sleep-option" data-mode="off" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left;">关闭定时</button>
+                        <button onclick="setSleepTimer('endOfTrack')" class="sleep-option" data-mode="endOfTrack" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left;">播完本集后关闭</button>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <button onclick="setSleepTimer('afterEpisodes', document.getElementById('sleep-episodes').value)" class="sleep-option" data-mode="afterEpisodes" style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">播完</button>
+                            <button onclick="setSleepTimer('afterEpisodes', document.getElementById('sleep-episodes').value)" class="sleep-option" data-mode="afterEpisodes" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left;">播完</button>
                             <select id="sleep-episodes" onchange="if(document.querySelector('.sleep-option[data-mode=afterEpisodes]').style.background.includes('rgba(100,255,218')) setSleepTimer('afterEpisodes', this.value)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #e0e0e0; padding: 8px 10px; border-radius: 8px; font-size: 13px; cursor: pointer;">
                                 <option value="1">1集</option>
                                 <option value="2">2集</option>
@@ -604,7 +937,7 @@
                             </select>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <button onclick="setSleepTimer('afterDuration', document.getElementById('sleep-duration').value)" class="sleep-option" data-mode="afterDuration" style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s;">定时</button>
+                            <button onclick="setSleepTimer('afterDuration', document.getElementById('sleep-duration').value)" class="sleep-option" data-mode="afterDuration" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #8892b0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left;">定时</button>
                             <select id="sleep-duration" onchange="if(document.querySelector('.sleep-option[data-mode=afterDuration]').style.background.includes('rgba(100,255,218')) setSleepTimer('afterDuration', this.value)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #e0e0e0; padding: 8px 10px; border-radius: 8px; font-size: 13px; cursor: pointer;">
                                 <option value="0.5">0.5小时</option>
                                 <option value="1">1小时</option>
@@ -613,224 +946,8 @@
                             </select>
                         </div>
                     </div>
-                    <div id="sleep-status" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(100, 255, 218, 0.05); border-radius: 8px; color: #64ffda; font-size: 12px; text-align: center;"></div>
                 </div>
-                
-                <!-- 进度条 -->
-                <div class="mb-4">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span id="podcast-current-time" style="color: #6b7280; font-size: 12px; min-width: 40px;">0:00</span>
-                        <div style="flex: 1; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; cursor: pointer;" id="podcast-progress-bar" onclick="seekPodcast(event)">
-                            <div id="podcast-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #64ffda, #a78bfa); border-radius: 2px; transition: width 0.1s linear;"></div>
-                        </div>
-                        <span id="podcast-duration" style="color: #6b7280; font-size: 12px; min-width: 40px;">0:00</span>
-                    </div>
-                </div>
-                
-                <!-- 控制按钮 + 语速 -->
-                <div class="flex items-center justify-center gap-4 mb-6">
-                    <button onclick="prevPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏮</button>
-                    <button id="podcast-play-btn" onclick="togglePodcast()" style="background: linear-gradient(135deg, #64ffda, #a78bfa); border: none; color: #1a1a2e; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(100, 255, 218, 0.3);">▶️</button>
-                    <button onclick="nextPodcast()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #8892b0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">⏭</button>
-                </div>
-                
-                <!-- 语速调节 -->
-                <div class="flex items-center justify-center gap-2 mb-2">
-                    <span style="color: #6b7280; font-size: 12px; margin-right: 4px;">语速</span>
-                    <button class="speed-btn" data-speed="0.5" onclick="setPlaybackRate(0.5)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">0.5X</button>
-                    <button class="speed-btn" data-speed="0.75" onclick="setPlaybackRate(0.75)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">0.75X</button>
-                    <button class="speed-btn" data-speed="1.0" onclick="setPlaybackRate(1.0)" style="background: rgba(100, 255, 218, 0.15); border: 1px solid rgba(100, 255, 218, 0.4); color: #64ffda; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">1.0X</button>
-                    <button class="speed-btn" data-speed="1.25" onclick="setPlaybackRate(1.25)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #8892b0; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;">1.2X</button>
-                </div>
-                
-                <!-- 播放列表 -->
-                <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
-                    <h4 style="color: #8892b0; font-size: 14px; margin-bottom: 12px;">播放列表</h4>
-                    <div class="space-y-2" id="podcast-playlist">
-                        <!-- 曲目1 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(100, 255, 218, 0.08); border: 1px solid rgba(100, 255, 218, 0.2);"
-                             data-index="0"
-                             onclick="playPodcast(0)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #64ffda; font-size: 14px; font-weight: bold;">《九界归尘》开篇</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目2 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="1"
-                             onclick="playPodcast(1)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第二章：墟界残响</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目3 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="2"
-                             onclick="playPodcast(2)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">🎧</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">第四章：散修的规矩</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目4 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="3"
-                             onclick="playPodcast(3)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第五章：墟界遗址</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目5 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="4"
-                             onclick="playPodcast(4)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第六章：归来者</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目6 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="5"
-                             onclick="playPodcast(5)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第七章：始源追杀</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目7 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="6"
-                             onclick="playPodcast(6)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第八章：重回灵溪</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目8 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="7"
-                             onclick="playPodcast(7)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第九章：月妖娆</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目9：第十一章 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="8"
-                             onclick="playPodcast(8)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第十一章：暗流涌动</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目10：第十二章 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="9"
-                             onclick="playPodcast(9)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第十二章：清洗</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目11：第十三章 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="10"
-                             onclick="playPodcast(10)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第十三章：墟界密使</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目12：第十四章 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="11"
-                             onclick="playPodcast(11)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第十四章：残魂渡</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- 曲目13：第十五章 -->
-                        <div class="podcast-track p-3 rounded-lg cursor-pointer hover:bg-white hover:bg-opacity-5 transition" 
-                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);"
-                             data-index="12"
-                             onclick="playPodcast(12)">
-                            <div class="flex items-center gap-3">
-                                <span class="track-icon" style="font-size: 24px;">📖</span>
-                                <div class="flex-1">
-                                    <p class="track-name" style="color: #e0e0e0; font-size: 14px; font-weight: bold;">《九界归尘》第十五章：墟界深处</p>
-                                </div>
-                                <span class="track-duration" style="color: #6b7280; font-size: 12px;"></span>
-                            </div>
-                        </div>
-                </div>
-            
-    </div>
+            </div>
         
         <!-- 播放统计（居中，位于播放器与留言区之间） -->
         <div id="play-counter" style="text-align: center; font-size: 12px; color: #6b7280; line-height: 1.8; cursor: default; margin-top: 20px; margin-bottom: 20px;">
@@ -974,6 +1091,12 @@
             
             // 播放新曲目
             currentPodcastIndex = index;
+            // 同步3D轮播
+            if (window.podcast3DCarousel && window.podcast3DCarousel.activeIndex !== index) {
+                window.podcast3DCarousel.activeIndex = index;
+                window.podcast3DCarousel.updateStyles();
+                if (window.podcast3DCarousel.reRender) window.podcast3DCarousel.reRender();
+            }
             const track = podcastList[index];
             podcastAudio = new Audio(track.file);
             // 加载外部字幕文件
@@ -1740,5 +1863,324 @@
         }, 10000 + Math.random() * 10000);
     })();
     </script>
+
+    <script>
+    // ===== 3D卡片轮播 for 播客播放列表 =====
+    class Podcast3DCarousel {
+        constructor(containerId, items) {
+            this.container = document.getElementById(containerId);
+            if (!this.container) return;
+            this.track = this.container.querySelector('.carousel-track-3d');
+            this.items = items || [];
+            this.activeIndex = 0;
+            this.startX = 0;
+            this.isDragging = false;
+            
+            this.render();
+            this.bindEvents();
+            this.updateStyles();
+        }
+        
+        render() {
+            if (!this.track) return;
+            this.track.innerHTML = '';
+            
+            this.items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'podcast-3d-card';
+                card.dataset.index = index;
+                
+                card.innerHTML = `
+                    <div class="podcast-3d-card-glow"></div>
+                    <div class="podcast-3d-card-inner">
+                        <div class="podcast-3d-card-icon">${item.icon || '📖'}</div>
+                        <div class="podcast-3d-card-title">${item.name}</div>
+                        ${index === this.activeIndex ? '<div class="podcast-3d-card-playing">🎧</div>' : ''}
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    if (index !== this.activeIndex) {
+                        this.goTo(index);
+                    }
+                });
+                
+                this.track.appendChild(card);
+            });
+        }
+        
+        reRender() {
+            // Re-render to update playing indicator
+            const cards = this.container.querySelectorAll('.podcast-3d-card');
+            cards.forEach((card, index) => {
+                const playing = card.querySelector('.podcast-3d-card-playing');
+                if (index === this.activeIndex && !playing) {
+                    // Need to re-render to show playing indicator
+                    this.render();
+                    return;
+                }
+            });
+        }
+        
+        bindEvents() {
+            this.container.addEventListener('mousedown', (e) => this.handleStart(e.clientX));
+            this.container.addEventListener('mousemove', (e) => this.handleMove(e.clientX));
+            this.container.addEventListener('mouseup', () => this.handleEnd());
+            this.container.addEventListener('mouseleave', () => this.handleEnd());
+            this.container.addEventListener('touchstart', (e) => this.handleStart(e.touches[0].clientX), { passive: true });
+            this.container.addEventListener('touchmove', (e) => this.handleMove(e.touches[0].clientX), { passive: true });
+            this.container.addEventListener('touchend', () => this.handleEnd());
+        }
+        
+        handleStart(clientX) {
+            this.startX = clientX;
+            this.isDragging = true;
+        }
+        
+        handleMove(clientX) {
+            if (!this.isDragging) return;
+            const diff = this.startX - clientX;
+            if (Math.abs(diff) > 80) {
+                if (diff > 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+                this.isDragging = false;
+            }
+        }
+        
+        handleEnd() {
+            this.isDragging = false;
+        }
+        
+        updateStyles() {
+            const cards = this.container.querySelectorAll('.podcast-3d-card');
+            cards.forEach((card, index) => {
+                const style = this.getCardStyle(index);
+                card.style.transform = `translate(-50%, -50%) translateX(${style.x}px) scale(${style.scale}) rotateY(${style.rotateY}deg) translateZ(${style.z}px)`;
+                card.style.opacity = style.opacity;
+                card.style.zIndex = style.zIndex;
+                
+                if (index === this.activeIndex) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+        
+        getCardStyle(index) {
+            const diff = index - this.activeIndex;
+            const absDistance = Math.abs(diff);
+            
+            if (absDistance > 2) {
+                return {
+                    x: diff > 0 ? 400 : -400,
+                    scale: 0.5,
+                    z: -300,
+                    opacity: 0,
+                    rotateY: diff * -20,
+                    zIndex: 0
+                };
+            }
+            
+            return {
+                x: diff * 140,
+                scale: Math.max(0.6, 1 - absDistance * 0.15),
+                z: -absDistance * 120,
+                opacity: Math.max(0.3, 1 - absDistance * 0.35),
+                rotateY: diff * -12,
+                zIndex: 10 - absDistance
+            };
+        }
+        
+        goTo(index) {
+            if (index < 0) index = this.items.length - 1;
+            if (index >= this.items.length) index = 0;
+            
+            this.activeIndex = index;
+            this.updateStyles();
+            
+            // Play the podcast
+            if (typeof window.playPodcast === 'function') {
+                window.playPodcast(index);
+            }
+        }
+        
+        next() {
+            this.goTo(this.activeIndex + 1);
+        }
+        
+        prev() {
+            this.goTo(this.activeIndex - 1);
+        }
+    }
+    
+    // 初始化3D轮播（DOM元素已存在，直接初始化）
+    if (window.podcastList && document.getElementById('carousel-track-3d')) {
+        window.podcast3DCarousel = new Podcast3DCarousel('carousel-stage-3d', window.podcastList);
+    }
+    
+        
+        // ===== 3D轮播功能 =====
+        let carouselActiveIndex = 0;
+        let isDragging = false;
+        let startX = 0;
+
+        // 渲染专辑卡片
+        function renderAlbumCards() {
+            const track = document.getElementById('carouselTrack');
+            if (!track) return;
+            track.innerHTML = '';
+            
+            podcastList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.dataset.index = index;
+                
+                card.innerHTML = `
+                    <div class="album-cover-wrapper">
+                        <img src="assets/images/河一.png" alt="${item.name}" class="album-cover" draggable="false"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='🎧';">
+                        <div class="album-info-glass">
+                            <p class="album-title">${item.name}</p>
+                            <p class="album-artist">九界修真</p>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    if (index !== carouselActiveIndex) {
+                        goTo(index);
+                    }
+                });
+                
+                track.appendChild(card);
+            });
+            
+            updateCardStyles();
+        }
+
+        // 更新卡片3D样式
+        function updateCardStyles() {
+            const cards = document.querySelectorAll('.album-card');
+            cards.forEach((card, index) => {
+                const style = getCardStyle(index);
+                card.style.transform = `translate(-50%, -50%) translateX(${style.x}px) scale(${style.scale}) rotateY(${style.rotateY}deg) translateZ(${style.z}px)`;
+                card.style.opacity = style.opacity;
+                card.style.zIndex = style.zIndex;
+            });
+        }
+
+        // 计算每张卡片的3D位置
+        function getCardStyle(index) {
+            const diff = index - carouselActiveIndex;
+            const absDistance = Math.abs(diff);
+            
+            if (absDistance > 2) {
+                return {
+                    x: diff > 0 ? 400 : -400,
+                    scale: 0.5,
+                    z: -300,
+                    opacity: 0,
+                    rotateY: diff * -20,
+                    zIndex: 0
+                };
+            }
+            
+            return {
+                x: diff * 140,
+                scale: Math.max(0.6, 1 - absDistance * 0.15),
+                z: -absDistance * 120,
+                opacity: Math.max(0.3, 1 - absDistance * 0.35),
+                rotateY: diff * -12,
+                zIndex: 10 - absDistance
+            };
+        }
+
+        // 跳转到指定曲目
+        function goTo(index) {
+            if (index < 0) index = podcastList.length - 1;
+            if (index >= podcastList.length) index = 0;
+            
+            carouselActiveIndex = index;
+            updateCardStyles();
+            updateSongInfoDisplay();
+            playPodcast(index);
+        }
+
+        // 更新歌曲信息显示
+        function updateSongInfoDisplay() {
+            const item = podcastList[carouselActiveIndex];
+            if (!item) return;
+            
+            const songTitle = document.getElementById('songTitle');
+            const songArtist = document.getElementById('songArtist');
+            const miniTitle = document.getElementById('miniTitle');
+            const miniArtist = document.getElementById('miniArtist');
+            const miniCover = document.getElementById('miniCover');
+            
+            if (songTitle) {
+                songTitle.textContent = item.name;
+                songTitle.classList.remove('fade-in');
+                songTitle.classList.add('fade-out');
+                setTimeout(() => {
+                    songTitle.classList.remove('fade-out');
+                    songTitle.classList.add('fade-in');
+                }, 50);
+            }
+            if (songArtist) songArtist.textContent = '九界修真';
+            if (miniTitle) miniTitle.textContent = item.name;
+            if (miniArtist) miniArtist.textContent = '九界修真';
+            if (miniCover) miniCover.src = 'assets/images/河一.png';
+        }
+
+        // 覆盖 prevPodcast 和 nextPodcast 使其同步3D轮播
+        window.prevPodcast = function() { goTo(carouselActiveIndex - 1); };
+        window.nextPodcast = function() { goTo(carouselActiveIndex + 1); };
+
+        // 拖动交互
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAlbumCards();
+            
+            const stage = document.getElementById('carouselStage');
+            if (stage) {
+                stage.addEventListener('mousedown', (e) => {
+                    startX = e.clientX;
+                    isDragging = true;
+                });
+                stage.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const diff = startX - e.clientX;
+                    if (Math.abs(diff) > 80) {
+                        if (diff > 0) goTo(carouselActiveIndex + 1);
+                        else goTo(carouselActiveIndex - 1);
+                        isDragging = false;
+                    }
+                });
+                stage.addEventListener('mouseup', () => isDragging = false);
+                stage.addEventListener('mouseleave', () => isDragging = false);
+                
+                // Touch events
+                stage.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    isDragging = true;
+                });
+                stage.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    const diff = startX - e.touches[0].clientX;
+                    if (Math.abs(diff) > 80) {
+                        if (diff > 0) goTo(carouselActiveIndex + 1);
+                        else goTo(carouselActiveIndex - 1);
+                        isDragging = false;
+                    }
+                });
+                stage.addEventListener('touchend', () => isDragging = false);
+            }
+        });
+        
+</script>
+    
 </body>
 </html>
