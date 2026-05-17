@@ -1476,41 +1476,39 @@
             // >5条：构建[原始 + 复制]，实现无缝循环滚动
             const displayList = [...allComments, ...allComments];
             container.innerHTML = buildHTML(displayList);
-            // 强制回流，确保浏览器已完成布局，使offsetHeight读取准确
-            container.offsetHeight;
-            container.style.transition = 'transform 0.5s ease-in-out';
 
-            // 动态计算单条高度（含gap）
-            const firstItem = container.querySelector('.comment-item');
-            const singleHeight = firstItem ? firstItem.offsetHeight : 48;
-            const gap = 8;
-            const itemAndGap = singleHeight + gap;
+            // 延迟100ms确保浏览器完成布局渲染后再读取尺寸
+            setTimeout(() => {
+                const firstItem = container.querySelector('.comment-item');
+                if (!firstItem) return;
 
-            // 视口固定显示5条（5条内容 + 4个gap）
-            viewport.style.height = (singleHeight * 5 + gap * 4) + 'px';
+                const singleHeight = Math.ceil(firstItem.getBoundingClientRect().height);
+                const gap = 8;
+                const step = singleHeight + gap;
 
-            commentScrollIndex = 0;
+                // 视口固定显示5条（5条内容 + 4个gap）
+                viewport.style.height = (singleHeight * 5 + gap * 4) + 'px';
 
-            // 滚动函数：每3秒向上滚动一条
-            function doScroll() {
-                commentScrollIndex++;
-                // 滚动完原始列表后，无缝重置到0（利用复制内容，视觉无感知）
-                if (commentScrollIndex >= allComments.length) {
-                    container.style.transition = 'none';
-                    commentScrollIndex = 0;
-                    container.style.transform = 'translateY(0)';
-                    // 强制回流，使无动画重置立即生效
-                    container.offsetHeight;
-                    container.style.transition = 'transform 0.5s ease-in-out';
-                } else {
-                    container.style.transform = `translateY(${-(commentScrollIndex * itemAndGap)}px)`;
-                }
-            }
+                container.style.transition = 'transform 0.5s ease-in-out';
+                container.style.transform = 'translateY(0px)';
+                commentScrollIndex = 0;
 
-            // 初始位置
-            container.style.transform = 'translateY(0)';
-
-            commentScrollTimer = setInterval(doScroll, 3000);
+                // 滚动函数：每3秒向上滚动一条
+                commentScrollTimer = setInterval(() => {
+                    commentScrollIndex++;
+                    if (commentScrollIndex >= allComments.length) {
+                        // 无缝重置：取消动画瞬间归零，再恢复动画
+                        container.style.transition = 'none';
+                        commentScrollIndex = 0;
+                        container.style.transform = 'translateY(0px)';
+                        container.offsetHeight; // 强制回流
+                        container.style.transition = 'transform 0.5s ease-in-out';
+                    } else {
+                        const offset = -(commentScrollIndex * step);
+                        container.style.transform = 'translateY(' + offset + 'px)';
+                    }
+                }, 3000);
+            }, 100);
         }
 
         // 点赞/取消点赞
