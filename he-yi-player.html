@@ -16,10 +16,50 @@
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #64ffda; font-size: 24px; cursor: pointer; text-decoration: none; transition: all 0.3s ease; }
         .back-btn:hover { background: rgba(100,255,218,0.2); transform: scale(1.1); }
         .author-avatars { position: fixed; top: 20px; left: 80px; z-index: 100; display: flex; gap: 12px; }
-        .author-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s ease; overflow: hidden; background: rgba(100,255,218,0.15); display: flex; align-items: center; justify-content: center; color: #64ffda; font-size: 11px; font-weight: bold; backdrop-filter: blur(10px); }
-        .author-avatar:hover { border-color: #64ffda; transform: scale(1.1); }
-        .author-avatar.active { border-color: #64ffda; box-shadow: 0 0 15px rgba(100,255,218,0.4); }
+        .author-avatar { position: relative; width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; background: rgba(100,255,218,0.15); display: flex; align-items: center; justify-content: center; color: #64ffda; font-size: 11px; font-weight: bold; backdrop-filter: blur(10px); }
+        .author-avatar:hover { border-color: #64ffda; transform: scale(1.15); }
+        .author-avatar.active { border-color: #64ffda; box-shadow: 0 0 15px rgba(100,255,218,0.4); transform: scale(1.15); }
         .author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        /* 作者简介悬浮容器 */
+        .author-tooltip {
+            position: absolute;
+            top: 58px;
+            left: 50%;
+            transform: translateX(-50%) translateY(6px);
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 0.5px solid rgba(100, 255, 218, 0.25);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-family: "FangSong", "STFangsong", "仿宋", serif;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            letter-spacing: 0.5px;
+        }
+        .author-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid rgba(15, 15, 26, 0.95);
+        }
+        .author-avatar:hover .author-tooltip,
+        .author-avatar.active .author-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
         /* 留言区域 */
         #comment-scroll-container { height: 220px; overflow: hidden; position: relative; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px; box-sizing: border-box; }
         .comment-item { padding: 8px 12px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); color: #ccd6f6; font-size: 13px; line-height: 1.5; font-family: "FangSong", "STFangsong", "仿宋", serif; display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
@@ -48,12 +88,15 @@
     <div class="author-avatars">
         <div class="author-avatar active" data-author="河一" onclick="filterByAuthor(this)" title="河一">
             <img src="assets/images/河一.png" alt="河一" onerror="this.parentNode.innerHTML='河一'">
+            <div class="author-tooltip">界域风水师 · 九界守护者</div>
         </div>
         <div class="author-avatar" data-author="刘浪浪" onclick="filterByAuthor(this)" title="刘浪浪">
             <img src="assets/images/刘浪浪.png" alt="刘浪浪" onerror="this.parentNode.innerHTML='刘浪浪'">
+            <div class="author-tooltip">重生者 · 系统持有者 · 九界主角</div>
         </div>
         <div class="author-avatar" data-author="甘道夫" onclick="filterByAuthor(this)" title="甘道夫">
             <img src="assets/images/甘道夫.png" alt="甘道夫" onerror="this.parentNode.innerHTML='甘道夫'">
+            <div class="author-tooltip">道门大佬 · 兄弟团核心 · 武当修道</div>
         </div>
     </div>
     
