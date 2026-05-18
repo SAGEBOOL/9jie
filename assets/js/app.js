@@ -19,6 +19,7 @@ const charactersData = [
         id: 'liulanglang',
         name: '刘浪浪',
         emoji: '🧙',
+        avatar: 'assets/images/刘浪浪.png',
         camp: 'protagonist',
         campName: '主角团',
         identity: '苏易行转世 + 苏舟神识/一体双魂/AI脑机',
