@@ -862,6 +862,11 @@
                     </div>
                 </div>
             
+                <!-- 字幕显示区域 -->
+                <div id="subtitle-wrap" style="display: none; text-align: center; margin: 10px 0; min-height: 60px; padding: 12px 16px; background: rgba(0,0,0,0.5); border-radius: 12px; backdrop-filter: blur(10px);">
+                    <p id="subtitle" style="margin: 0; font-size: 15px; color: #e0e0e0; line-height: 1.6; font-family: 'FangSong', 'STFangsong', '仿宋', serif;"></p>
+                </div>
+
                 <!-- 歌曲信息 -->
                 <div style="text-align: center; margin: 30px 0;">
                     <div id="songInfoText" style="transition: opacity 0.3s ease, transform 0.3s ease;">
@@ -1494,13 +1499,8 @@
                     const liked = likeData[i] || false;
                     const displayLikes = c.likes + (liked ? 1 : 0);
                     div.innerHTML = '<span class="comment-text">' + c.name + '：' + c.text + '</span><span class="comment-like ' + (liked ? 'liked' : '') + '" data-idx="' + i + '">💗 ' + displayLikes + '</span>';
+                    div.querySelector('.comment-like').addEventListener('click', ev => toggleLike(i, ev));
                     viewport.appendChild(div);
-                    const clone = div.cloneNode(true);
-                    clone.querySelector('.comment-like').addEventListener('click', ev => toggleLike(i, ev));
-                    viewport.appendChild(clone);
-                });
-                viewport.querySelectorAll('.comment-like').forEach(el => {
-                    el.addEventListener('click', ev => toggleLike(parseInt(el.dataset.idx), ev));
                 });
             }
 
