@@ -996,14 +996,14 @@
 
         // ===== 播放列表 =====
         const podcastList = [
-            { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-yi-opening.txt' },
+            { name: '《九界归尘》开篇', file: 'assets/music/he-yi-opening.mp3', icon: '📖', cover: 'assets/images/河一.png', subtitleFile: 'assets/subtitles/he-yi-opening.txt' },
             { name: '《九界归尘》第二章：墟界残响', file: 'assets/music/he-y-i-chapter-02.mp3', icon: '📖', subtitleFile: 'assets/subtitles/he-y-i-chapter-02.txt' },
-            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', icon: '🎧', subtitleFile: 'assets/subtitles/第四章-散修的规矩.txt' },
+            { name: '第四章：散修的规矩', file: 'assets/music/第四章-散修的规矩.mp3', icon: '🎧', cover: 'assets/images/第三章-林清.png', subtitleFile: 'assets/subtitles/第四章-散修的规矩.txt' },
             { name: '《九界归尘》第五章：墟界遗址', file: 'assets/music/第五章-墟界遗址.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第五章-墟界遗址.txt' },
             { name: '《九界归尘》第六章：归来者', file: 'assets/music/第六章-归来者.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第六章-归来者.txt' },
             { name: '《九界归尘》第七章：始源追杀', file: 'assets/music/第七章-始源追杀.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第七章-始源追杀.txt' },
             { name: '《九界归尘》第八章：重回灵溪', file: 'assets/music/第八章-重回灵溪.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第八章-重回灵溪.txt' },
-            { name: '《九界归尘》第九章：月妖娆', file: 'assets/music/第九章-月妖娆.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第九章-月妖娆.txt' },
+            { name: '《九界归尘》第九章：月妖娆', file: 'assets/music/第九章-月妖娆.mp3', icon: '📖', cover: 'assets/images/第十章-月妖娆.png', subtitleFile: 'assets/subtitles/第九章-月妖娆.txt' },
             { name: '《九界归尘》第十一章：暗流涌动', file: 'assets/music/第十一章：暗流涌动.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十一章-暗流涌动.txt' },
             { name: '《九界归尘》第十二章：清洗', file: 'assets/music/第十二章：清洗.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十二章：清洗.txt' },
             { name: '《九界归尘》第十三章：墟界密使', file: 'assets/music/第十三章：墟界密使.mp3', icon: '📖', subtitleFile: 'assets/subtitles/第十三章：墟界密使.txt' },
@@ -1320,10 +1320,11 @@
                     const card = document.createElement('div');
                     card.className = 'podcast-3d-card';
                     card.dataset.index = index;
+                    const coverHtml = item.cover ? `<img src="${item.cover}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" alt="${item.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=font-size:48px>${item.icon || '📖'}</div>'">` : `<div style="font-size:48px">${item.icon || '📖'}</div>`;
                     card.innerHTML = `
                         <div class="podcast-3d-card-glow"></div>
                         <div class="podcast-3d-card-inner">
-                            <div class="podcast-3d-card-icon">${item.icon || '📖'}</div>
+                            <div class="podcast-3d-card-icon" style="padding:0;overflow:hidden;">${coverHtml}</div>
                             <div class="podcast-3d-card-title">${item.name}</div>
                             ${index === this.activeIndex ? '<div class="podcast-3d-card-playing">🎧</div>' : ''}
                         </div>`;
