@@ -215,9 +215,12 @@
         /* ========== 3D卡片轮播样式 ========== */
         .carousel-stage-3d {
             position: relative;
-            width: 320px;
-            height: 400px;
-            margin: 20px auto;
+            width: 80vw;
+            max-width: 340px;
+            height: 60vw;
+            max-height: 420px;
+            min-height: 280px;
+            margin: 10px auto;
             cursor: grab;
             perspective: 1200px;
             touch-action: none;
@@ -236,8 +239,11 @@
 
         .podcast-3d-card {
             position: absolute;
-            width: 220px;
-            height: 300px;
+            width: 55vw;
+            max-width: 220px;
+            height: 75vw;
+            max-height: 300px;
+            min-height: 200px;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
@@ -854,7 +860,7 @@
             
             <!-- 播放器容器 -->
             <!-- 3D播放器容器 -->
-            <div id="podcast-player" style="max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box; position: relative;">
+            <div id="podcast-player" style="max-width: 100vw; width: 100%; margin: 0 auto; padding: 10px; box-sizing: border-box; position: relative;">
             
                 <!-- 3D轮播舞台 -->
                 <div class="carousel-stage-3d" id="carousel-stage-3d" style="position: relative; width: 300px; height: 400px; margin: 20px auto; cursor: grab; perspective: 1200px;">
@@ -1351,6 +1357,7 @@
                 this.container.addEventListener('touchstart', e => { e.preventDefault(); this.startX = e.touches[0].clientX; this.isDragging = true; }, { passive: false });
                 this.container.addEventListener('touchmove', e => { e.preventDefault(); this.handleMove(e.touches[0].clientX); }, { passive: false });
                 this.container.addEventListener('touchend', () => this.handleEnd());
+                window.addEventListener('resize', () => this.updateStyles());
             }
             handleMove(clientX) {
                 if (!this.isDragging) return;
@@ -1374,9 +1381,12 @@
             getCardStyle(index) {
                 const diff = index - this.activeIndex;
                 const abs = Math.abs(diff);
+                const vw = window.innerWidth;
+                const offset = Math.min(400, vw * 0.5);
+                const spacing = Math.min(140, vw * 0.25);
                 if (abs > 2) {
                     return {
-                        x: diff > 0 ? 400 : -400,
+                        x: diff > 0 ? offset : -offset,
                         scale: 0.5,
                         z: -300,
                         opacity: 0,
@@ -1385,7 +1395,7 @@
                     };
                 }
                 return {
-                    x: diff * 140,
+                    x: diff * spacing,
                     scale: Math.max(0.6, 1 - abs * 0.15),
                     z: -abs * 120,
                     opacity: Math.max(0.3, 1 - abs * 0.35),
