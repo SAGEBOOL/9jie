@@ -220,6 +220,7 @@
             margin: 20px auto;
             cursor: grab;
             perspective: 1200px;
+            touch-action: none;
         }
 
         .carousel-stage-3d:active {
@@ -1347,8 +1348,8 @@
                 this.container.addEventListener('mousemove', e => this.handleMove(e.clientX));
                 this.container.addEventListener('mouseup', () => this.handleEnd());
                 this.container.addEventListener('mouseleave', () => this.handleEnd());
-                this.container.addEventListener('touchstart', e => { this.startX = e.touches[0].clientX; this.isDragging = true; }, { passive: true });
-                this.container.addEventListener('touchmove', e => this.handleMove(e.touches[0].clientX), { passive: true });
+                this.container.addEventListener('touchstart', e => { e.preventDefault(); this.startX = e.touches[0].clientX; this.isDragging = true; }, { passive: false });
+                this.container.addEventListener('touchmove', e => { e.preventDefault(); this.handleMove(e.touches[0].clientX); }, { passive: false });
                 this.container.addEventListener('touchend', () => this.handleEnd());
             }
             handleMove(clientX) {
