@@ -702,16 +702,76 @@
             const shareDropdown = document.getElementById('share-dropdown');
 
             if (shareButton && shareDropdown) {
-                shareButton.addEventListener('click', function() {
+                shareButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     shareDropdown.classList.toggle('hidden');
                 });
-
+                
                 // 点击其他地方关闭下拉菜单
                 document.addEventListener('click', function(event) {
                     if (!shareButton.contains(event.target) && !shareDropdown.contains(event.target)) {
                         shareDropdown.classList.add('hidden');
                     }
                 });
+                
+                // 复制链接
+                const shareLink = shareDropdown.querySelector('a:nth-child(1)');
+                if (shareLink) {
+                    shareLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = window.location.href;
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(url).then(() => {
+                                alert('链接已复制到剪贴板');
+                            });
+                        } else {
+                            // Fallback
+                            const input = document.createElement('input');
+                            input.value = url;
+                            document.body.appendChild(input);
+                            input.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(input);
+                            alert('链接已复制到剪贴板');
+                        }
+                        shareDropdown.classList.add('hidden');
+                    });
+                }
+                
+                // 邮件分享
+                const shareEmail = shareDropdown.querySelector('a:nth-child(2)');
+                if (shareEmail) {
+                    shareEmail.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = window.location.href;
+                        const title = document.title;
+                        const mailtoUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent('推荐你收听：' + title + ' ' + url)}`;
+                        window.location.href = mailtoUrl;
+                        shareDropdown.classList.add('hidden');
+                    });
+                }
+                
+                // 微信分享
+                const shareWechat = shareDropdown.querySelector('a:nth-child(3)');
+                if (shareWechat) {
+                    shareWechat.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        alert('请截图或使用微信扫一扫分享');
+                        shareDropdown.classList.add('hidden');
+                    });
+                }
+                
+                // 微博分享
+                const shareWeibo = shareDropdown.querySelector('a:nth-child(4)');
+                if (shareWeibo) {
+                    shareWeibo.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = encodeURIComponent(window.location.href);
+                        const title = encodeURIComponent(document.title);
+                        window.open(`https://service.weibo.com/share/share.php?url=${url}&title=${title}`, '_blank');
+                        shareDropdown.classList.add('hidden');
+                    });
+                }
             }
 
             // 元素动画

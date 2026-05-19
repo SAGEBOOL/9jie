@@ -1152,14 +1152,12 @@
                         const cards = Array.from(episodeCards);
                         const currentIndex = cards.findIndex(c => c.classList.contains('bg-primary'));
                         const nextIndex = (currentIndex + 1) % cards.length;
-                        if (cards[nextIndex]) cards[nextIndex].click();
+                    if (cards[nextIndex]) cards[nextIndex].click();
                     }
                 });
             }
-
-        });
-    
-            // 分享下拉菜单
+            
+            // ============ 分享下拉菜单 ============
             const shareButton = document.getElementById('share-button');
             const shareDropdown = document.getElementById('share-dropdown');
             
@@ -1235,6 +1233,7 @@
                     });
                 }
             }
-</script>
+        });
+    </script>
 </body>
 </html>
