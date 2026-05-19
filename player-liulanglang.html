@@ -294,6 +294,20 @@
             border-radius: 3px;
         }
         
+        /* 功能按钮激活状态 */
+        .control-active {
+            color: #FF6B35 !important;
+        }
+        
+        /* 功能按钮弹窗 */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        
+        .modal-content {
+            animation: slideUp 0.3s ease-in-out;
+        }
+        
         /* 响应式调整 */
         @media (max-width: 768px) {
             .vinyl-record {
@@ -433,19 +447,98 @@
                         </div>
                         
                         <!-- 额外控制按钮 -->
-                        <div class="flex items-center justify-center space-x-8 mt-6">
-                            <button class="text-white hover:text-primary transition-colors">
+                        <div class="flex items-center justify-center space-x-6 mt-6 flex-wrap gap-y-4" id="control-buttons">
+                            <button class="text-white hover:text-primary transition-colors relative" id="shuffle-btn" title="随机播放">
                                 <i class="fa fa-random"></i>
                             </button>
-                            <button class="text-white hover:text-primary transition-colors">
+                            <button class="text-white hover:text-primary transition-colors relative" id="loop-btn" title="循环播放">
                                 <i class="fa fa-repeat"></i>
+                                <span id="loop-badge" class="hidden absolute -top-2 -right-2 text-[8px] bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center">1</span>
                             </button>
-                            <button class="text-white hover:text-primary transition-colors">
+                            <button class="text-white hover:text-primary transition-colors" id="favorite-btn" title="收藏">
                                 <i class="fa fa-heart-o"></i>
                             </button>
-                            <button class="text-white hover:text-primary transition-colors">
+                            <button class="text-white hover:text-primary transition-colors" id="share-btn" title="分享">
                                 <i class="fa fa-share-alt"></i>
                             </button>
+                            <button class="text-white hover:text-primary transition-colors relative" id="timer-btn" title="定时关闭">
+                                <i class="fa fa-clock-o"></i>
+                                <span id="timer-badge" class="hidden absolute -top-2 -right-2 text-[8px] bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center"></span>
+                            </button>
+                            <button class="text-white hover:text-primary transition-colors relative" id="speed-btn" title="语速调节">
+                                <i class="fa fa-tachometer"></i>
+                                <span id="speed-badge" class="hidden absolute -top-2 -right-2 text-[8px] bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center">1x</span>
+                            </button>
+                        </div>
+
+                        <!-- 定时关闭下拉菜单 -->
+                        <div id="timer-menu" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                            <div class="bg-darker border border-gray-700 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+                                <h3 class="text-lg font-bold mb-4 text-center">定时关闭</h3>
+                                <div class="space-y-3 mb-6">
+                                    <button class="timer-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center" data-minutes="15">
+                                        <i class="fa fa-clock-o mr-3 text-primary"></i>
+                                        <span>15 分钟后关闭</span>
+                                    </button>
+                                    <button class="timer-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center" data-minutes="30">
+                                        <i class="fa fa-clock-o mr-3 text-primary"></i>
+                                        <span>30 分钟后关闭</span>
+                                    </button>
+                                    <button class="timer-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center" data-minutes="60">
+                                        <i class="fa fa-clock-o mr-3 text-primary"></i>
+                                        <span>60 分钟后关闭</span>
+                                    </button>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="number" id="timer-custom" placeholder="自定义" min="1" max="180" class="flex-1 py-3 px-4 bg-dark border border-gray-700 rounded-lg text-white focus:border-primary focus:outline-none text-center">
+                                        <span class="text-gray-400">分钟</span>
+                                        <button id="timer-custom-confirm" class="py-3 px-4 bg-primary rounded-lg hover:bg-opacity-90 transition-colors">
+                                            <i class="fa fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button id="timer-cancel" class="w-full py-3 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors">
+                                    <i class="fa fa-stop mr-2"></i>取消定时
+                                </button>
+                                <button id="timer-close" class="w-full py-3 mt-3 text-gray-400 hover:text-white transition-colors text-sm">
+                                    关闭
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 语速调节下拉菜单 -->
+                        <div id="speed-menu" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                            <div class="bg-darker border border-gray-700 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+                                <h3 class="text-lg font-bold mb-4 text-center">语速调节</h3>
+                                <div class="space-y-3 mb-4">
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center justify-between" data-speed="0.5">
+                                        <span>0.5x</span>
+                                        <span class="text-gray-400 text-sm">慢速</span>
+                                    </button>
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center justify-between" data-speed="0.75">
+                                        <span>0.75x</span>
+                                        <span class="text-gray-400 text-sm">稍慢</span>
+                                    </button>
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg border-primary transition-colors text-left flex items-center justify-between" data-speed="1">
+                                        <span class="text-primary">1x</span>
+                                        <span class="text-gray-400 text-sm">正常</span>
+                                    </button>
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center justify-between" data-speed="1.25">
+                                        <span>1.25x</span>
+                                        <span class="text-gray-400 text-sm">稍快</span>
+                                    </button>
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center justify-between" data-speed="1.5">
+                                        <span>1.5x</span>
+                                        <span class="text-gray-400 text-sm">快速</span>
+                                    </button>
+                                    <button class="speed-option w-full py-3 px-4 bg-dark border border-gray-700 rounded-lg hover:border-primary transition-colors text-left flex items-center justify-between" data-speed="2">
+                                        <span>2x</span>
+                                        <span class="text-gray-400 text-sm">极快</span>
+                                    </button>
+                                </div>
+                                <button id="speed-close" class="w-full py-3 text-gray-400 hover:text-white transition-colors text-sm">
+                                    关闭
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -877,7 +970,286 @@
             
             animatedElements.forEach(element => {
                 observer.observe(element);
+            });            // ============ 功能按钮实现 ============
+            
+            // 1. 随机播放
+            const shuffleBtn = document.getElementById('shuffle-btn');
+            let shuffleMode = false;
+            if (shuffleBtn) {
+                shuffleBtn.addEventListener('click', function() {
+                    shuffleMode = !shuffleMode;
+                    this.classList.toggle('control-active');
+                    if (shuffleMode) {
+                        showToast('随机播放已开启');
+                    } else {
+                        showToast('随机播放已关闭');
+                    }
+                });
+            }
+            
+            // 2. 循环播放
+            const loopBtn = document.getElementById('loop-btn');
+            const loopBadge = document.getElementById('loop-badge');
+            let loopMode = 0; // 0: 不循环, 1: 循环全部, 2: 循环单曲
+            if (loopBtn) {
+                loopBtn.addEventListener('click', function() {
+                    loopMode = (loopMode + 1) % 3;
+                    this.classList.toggle('control-active', loopMode > 0);
+                    if (loopBadge) {
+                        if (loopMode === 0) {
+                            loopBadge.classList.add('hidden');
+                        } else {
+                            loopBadge.classList.remove('hidden');
+                            loopBadge.textContent = loopMode === 1 ? '↻' : '1';
+                        }
+                    }
+                    if (audio) audio.loop = (loopMode === 2);
+                    const messages = ['循环播放已关闭', '循环播放已开启（全部）', '单曲循环已开启'];
+                    showToast(messages[loopMode]);
+                });
+            }
+            
+            // 3. 收藏功能
+            const favoriteBtn = document.getElementById('favorite-btn');
+            let isFavorited = false;
+            if (favoriteBtn) {
+                favoriteBtn.addEventListener('click', function() {
+                    isFavorited = !isFavorited;
+                    const icon = this.querySelector('i');
+                    if (isFavorited) {
+                        icon.classList.remove('fa-heart-o');
+                        icon.classList.add('fa-heart');
+                        this.classList.add('control-active');
+                        showToast('已添加到收藏');
+                        saveToFavorites();
+                    } else {
+                        icon.classList.remove('fa-heart');
+                        icon.classList.add('fa-heart-o');
+                        this.classList.remove('control-active');
+                        showToast('已取消收藏');
+                        removeFromFavorites();
+                    }
+                });
+            }
+            
+            function saveToFavorites() {
+                const currentCard = document.querySelector('.episode-card.bg-primary');
+                if (!currentCard) return;
+                const episode = currentCard.getAttribute('data-episode');
+                const src = currentCard.getAttribute('data-src');
+                const title = currentCard.querySelector('h3')?.textContent || '';
+                let favorites = JSON.parse(localStorage.getItem('9jie_favorites') || '[]');
+                if (!favorites.find(f => f.src === src)) {
+                    favorites.push({ episode, src, title, time: new Date().toISOString() });
+                    localStorage.setItem('9jie_favorites', JSON.stringify(favorites));
+                }
+            }
+            
+            function removeFromFavorites() {
+                const currentCard = document.querySelector('.episode-card.bg-primary');
+                if (!currentCard) return;
+                const src = currentCard.getAttribute('data-src');
+                let favorites = JSON.parse(localStorage.getItem('9jie_favorites') || '[]');
+                favorites = favorites.filter(f => f.src !== src);
+                localStorage.setItem('9jie_favorites', JSON.stringify(favorites));
+            }
+            
+            // 4. 分享功能
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function() {
+                    const currentCard = document.querySelector('.episode-card.bg-primary');
+                    const title = currentCard?.querySelector('h3')?.textContent || '九界播客';
+                    const url = window.location.href;
+                    if (navigator.share) {
+                        navigator.share({ title, url })
+                            .catch(e => console.log('分享取消'));
+                    } else {
+                        // 复制链接
+                        navigator.clipboard.writeText(url).then(() => {
+                            showToast('链接已复制到剪贴板');
+                        }).catch(() => {
+                            // Fallback
+                            const input = document.createElement('input');
+                            input.value = url;
+                            document.body.appendChild(input);
+                            input.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(input);
+                            showToast('链接已复制到剪贴板');
+                        });
+                    }
+                });
+            }
+            
+            // 5. 定时关闭
+            const timerBtn = document.getElementById('timer-btn');
+            const timerMenu = document.getElementById('timer-menu');
+            const timerBadge = document.getElementById('timer-badge');
+            const timerCancel = document.getElementById('timer-cancel');
+            const timerClose = document.getElementById('timer-close');
+            const timerCustom = document.getElementById('timer-custom');
+            const timerCustomConfirm = document.getElementById('timer-custom-confirm');
+            let timerTimeout = null;
+            let timerMinutes = 0;
+            
+            if (timerBtn) {
+                timerBtn.addEventListener('click', function() {
+                    if (timerMenu) timerMenu.classList.remove('hidden');
+                });
+            }
+            
+            document.querySelectorAll('.timer-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const minutes = parseInt(this.getAttribute('data-minutes'));
+                    setTimer(minutes);
+                    if (timerMenu) timerMenu.classList.add('hidden');
+                });
             });
+            
+            if (timerCustomConfirm) {
+                timerCustomConfirm.addEventListener('click', function() {
+                    const minutes = parseInt(timerCustom?.value);
+                    if (minutes && minutes > 0 && minutes <= 180) {
+                        setTimer(minutes);
+                        if (timerMenu) timerMenu.classList.add('hidden');
+                    } else {
+                        showToast('请输入1-180之间的数字');
+                    }
+                });
+            }
+            
+            if (timerCancel) {
+                timerCancel.addEventListener('click', function() {
+                    clearTimer();
+                    if (timerMenu) timerMenu.classList.add('hidden');
+                });
+            }
+            
+            if (timerClose) {
+                timerClose.addEventListener('click', function() {
+                    if (timerMenu) timerMenu.classList.add('hidden');
+                });
+            }
+            
+            function setTimer(minutes) {
+                clearTimer();
+                timerMinutes = minutes;
+                const ms = minutes * 60 * 1000;
+                timerTimeout = setTimeout(() => {
+                    if (audio) audio.pause();
+                    showToast('定时关闭：播放已停止');
+                    clearTimer();
+                }, ms);
+                if (timerBadge) {
+                    timerBadge.classList.remove('hidden');
+                    timerBadge.textContent = `${minutes}m`;
+                }
+                timerBtn?.classList.add('control-active');
+                showToast(`定时关闭已设置：${minutes} 分钟后`);
+            }
+            
+            function clearTimer() {
+                if (timerTimeout) {
+                    clearTimeout(timerTimeout);
+                    timerTimeout = null;
+                }
+                timerMinutes = 0;
+                if (timerBadge) timerBadge.classList.add('hidden');
+                timerBtn?.classList.remove('control-active');
+            }
+            
+            // 6. 语速调节
+            const speedBtn = document.getElementById('speed-btn');
+            const speedMenu = document.getElementById('speed-menu');
+            const speedBadge = document.getElementById('speed-badge');
+            const speedClose = document.getElementById('speed-close');
+            const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+            let currentSpeed = 1;
+            
+            if (speedBtn) {
+                speedBtn.addEventListener('click', function() {
+                    if (speedMenu) speedMenu.classList.remove('hidden');
+                });
+            }
+            
+            document.querySelectorAll('.speed-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const speed = parseFloat(this.getAttribute('data-speed'));
+                    setSpeed(speed);
+                    if (speedMenu) speedMenu.classList.add('hidden');
+                });
+            });
+            
+            if (speedClose) {
+                speedClose.addEventListener('click', function() {
+                    if (speedMenu) speedMenu.classList.add('hidden');
+                });
+            }
+            
+            function setSpeed(speed) {
+                currentSpeed = speed;
+                if (audio) audio.playbackRate = speed;
+                if (speedBadge) {
+                    speedBadge.classList.remove('hidden');
+                    speedBadge.textContent = `${speed}x`;
+                }
+                speedBtn?.classList.add('control-active');
+                // 更新选中状态
+                document.querySelectorAll('.speed-option').forEach(btn => {
+                    const s = parseFloat(btn.getAttribute('data-speed'));
+                    btn.classList.toggle('border-primary', s === speed);
+                    btn.classList.toggle('bg-opacity-20', s === speed);
+                    if (s === speed) {
+                        btn.querySelector('span:first-child')?.classList.add('text-primary');
+                    } else {
+                        btn.querySelector('span:first-child')?.classList.remove('text-primary');
+                    }
+                });
+                showToast(`语速已设置为 ${speed}x`);
+            }
+            
+            // Toast 提示
+            function showToast(message) {
+                let toast = document.getElementById('toast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'toast';
+                    toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-darker border border-gray-700 text-white px-6 py-3 rounded-lg shadow-2xl z-50 transition-all duration-300 opacity-0';
+                    document.body.appendChild(toast);
+                }
+                toast.textContent = message;
+                toast.classList.remove('opacity-0');
+                toast.classList.add('opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0');
+                }, 2000);
+            }
+            
+            // 监听音频结束（随机/循环逻辑）
+            if (audio) {
+                audio.addEventListener('ended', function() {
+                    if (loopMode === 2) return; // 单曲循环由 audio.loop 处理
+                    if (shuffleMode) {
+                        // 随机播放下一首
+                        const cards = Array.from(episodeCards);
+                        const currentIndex = cards.findIndex(c => c.classList.contains('bg-primary'));
+                        let nextIndex;
+                        do {
+                            nextIndex = Math.floor(Math.random() * cards.length);
+                        } while (nextIndex === currentIndex && cards.length > 1);
+                        if (cards[nextIndex]) cards[nextIndex].click();
+                    } else if (loopMode === 1) {
+                        // 循环全部
+                        const cards = Array.from(episodeCards);
+                        const currentIndex = cards.findIndex(c => c.classList.contains('bg-primary'));
+                        const nextIndex = (currentIndex + 1) % cards.length;
+                        if (cards[nextIndex]) cards[nextIndex].click();
+                    }
+                });
+            }
+
         });
     </script>
     
